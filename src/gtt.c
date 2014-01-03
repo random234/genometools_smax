@@ -270,7 +270,6 @@ GtToolbox* gtt_tools(void)
 #endif
 
 	gt_toolbox_add_tool(tools, "smax", gt_smax());
-
   return tools;
 }
 
