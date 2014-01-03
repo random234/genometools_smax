@@ -159,6 +159,8 @@
 #include "tools/gt_wtree.h"
 #include "tools/gt_unique_encseq.h"
 #include "tools/gt_unique_encseq_extract.h"
+#include "tools/gt_smax.h"
+#include "tools/gt_linsmax.h"
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
@@ -257,6 +259,10 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "featureindex", gt_featureindex());
   gt_toolbox_add_tool(tools, "mkfeatureindex", gt_mkfeatureindex());
 #endif
+
+	gt_toolbox_add_tool(tools, "smax", gt_smax());
+  gt_toolbox_add_tool(tools, "linsmax", gt_linsmax());
+
 
   return tools;
 }
