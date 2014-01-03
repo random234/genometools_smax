@@ -22,7 +22,7 @@ ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(inputindex,0),
                                                  SARR_LCPTAB |
                                                  SARR_SUFTAB |
                                                  SARR_ESQTAB,
-                                                 true,
+                                                 false,
                                                  //SEQ_scan,
                                                  logger,
                                                  err);
