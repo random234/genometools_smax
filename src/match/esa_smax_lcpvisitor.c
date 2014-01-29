@@ -135,7 +135,7 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(
 
 //	gt_timer_show_progress(lev->smaxprogress,"visiting lcp interval", stdout);
 
-  if(lcp >= lev->searchlength && ret_info->maxlcpinterval == true)  
+  if(lcp >= lev->searchlength && ret_info->maxlcpinterval == true) 
   {
     if(verify_supmax(lev,lb,rb)) {
 //			printf("lb: %lu rb: %lu\n",lb,rb);
@@ -211,7 +211,7 @@ bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb, GtUword rb) {
   for(i=lb;i<=rb;i++) 
   {    
     if(!suftab[i]==0) 
-    {     
+    {    
       if(ISNOTSPECIAL(gt_encseq_get_encoded_char(sa->encseq,suftab[i]-1,0))) 
       {
         if(marktab[gt_encseq_get_encoded_char(sa->encseq,suftab[i]-1,0)] == true)
