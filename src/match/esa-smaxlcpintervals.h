@@ -15,13 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_LCPSMAXINTERVALS_H
-#define ESA_LCPSMAXINTERVALS_H
+#ifndef ESA_SMAXLCPINTERVALS_H
+#define ESA_SMAXLCPINTERVALS_H
 
 #include "core/logger_api.h"
 #include "core/error_api.h"
 
-int gt_runsmaxlcpvalues(GtStr *,GtUword, bool, bool, bool, bool, GtLogger *, GtError *);
+int gt_runsmaxlcpvalues(GtStr *,GtUword, bool, bool, bool, bool, GtLogger *,
+    GtError *);
 
 int gt_smax_runscanesa(const char *inputindex, unsigned int mode,
                   GtLogger *logger,GtError *err);

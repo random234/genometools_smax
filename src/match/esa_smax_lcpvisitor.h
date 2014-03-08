@@ -25,7 +25,8 @@
 typedef struct GtESASmaxLcpintervalsVisitor GtESASmaxLcpintervalsVisitor;
 
 const GtESAVisitorClass* gt_esa_smax_lcpitvs_visitor_class(void);
-GtESAVisitor*            gt_esa_smax_lcpitvs_visitor_new(Sequentialsuffixarrayreader *, GtUword, bool, bool, GtTimer *);
+GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(Sequentialsuffixarrayreader *,
+    GtUword, bool, bool, GtTimer *);
 bool verify_supmax(GtESASmaxLcpintervalsVisitor *, GtUword, GtUword);
 bool lcp_local_max(GtUword , GtUword , GtUword , const Suffixarray *);
 bool gt_esa_smax_lcpitvs_visitor_get_info(GtESAVisitorInfo *);

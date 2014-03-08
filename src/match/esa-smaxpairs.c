@@ -179,7 +179,7 @@ static int processleafedge_smaxpairs(bool firstsucc,
                                     GtUword fatherdepth,
                                     GtBUinfo_smaxpairs *father,
                                     GtUword leafnumber,
-                                    //~ GT_UNUSED GtUword seqnum,
+                                    /* GT_UNUSED GtUword seqnum, */
                                     GT_UNUSED GtUword relpos,
                                     GtBUstate_smaxpairs *state,
                                     GtError *err)
@@ -189,7 +189,7 @@ static int processleafedge_smaxpairs(bool firstsucc,
   GtUchar leftchar;
 
 #ifdef SKDEBUG
-  printf("%s %lu firstsucc=%s, __func__," " depth(father)= %lu\n",
+  printf("%s %GT_WU firstsucc=%s, __func__," " depth(father)= %GT_WU\n",
          leafnumber,
          firstsucc ? "true" : "false",
          fatherdepth);
@@ -271,7 +271,7 @@ static int processbranchingedge_smaxpairs(bool firstsucc,
   GtUword *start, *spptr, *fptr, *fstart;
 
 #ifdef SKDEBUG
-  printf("%s firstsucc=%s, depth(father)= %lu\n",
+  printf("%s firstsucc=%s, depth(father)= %GT_WU\n",
           __func__,firstsucc ? "true" : "false",fatherdepth);
 #endif
   if (fatherdepth < (GtUword) state->searchlength)
@@ -379,7 +379,6 @@ int gt_enumeratesmaxpairs(Sequentialsuffixarrayreader *ssar,
     ptr = &state->poslist[base];
     GT_INITARRAY(ptr,GtUlong);
   }
-  //~ if (gt_esa_bottomup_smaxpairs(ssar, state,state->poslist[base],err) != 0)
   if (gt_esa_bottomup_smaxpairs(ssar, state,0,err) != 0)
   {
     haserr = true;

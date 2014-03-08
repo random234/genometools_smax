@@ -6,11 +6,9 @@
 typedef struct GtESAMarkTab GtESAMarkTab;
 
 GtESAMarkTab* gt_esa_marktab_new(const GtEncseq *encseq);
-void gt_esa_marktab_set(GtESAMarkTab *, int, bool);
-int gt_esa_marktab_get(GtESAMarkTab *, int);
-int gt_esa_marktab_size(GtESAMarkTab *tab);
+void gt_esa_marktab_set(GtESAMarkTab *, unsigned int);
+bool gt_esa_marktab_get(const GtESAMarkTab *, unsigned int);
 void gt_esa_marktab_reset(GtESAMarkTab *);
+void gt_esa_marktab_delete(GtESAMarkTab *);
 
 #endif
-
-

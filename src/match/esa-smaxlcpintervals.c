@@ -28,9 +28,8 @@ static void showbranchingedgeDFS(bool firstsucc,GtUword fd,
                                  GtUword flb,
                                  GtUword sd,GtUword slb)
 {
-  printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
+  printf("B %c GT_WU GT_WU GT_WU GT_WU\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
 }
-
 
 static int processleafedge_elcp(bool firstsucc,
                                 GtUword fatherdepth,
@@ -41,7 +40,7 @@ static int processleafedge_elcp(bool firstsucc,
 {
   Lcpinterval *father = (Lcpinterval *) afather;
 
-  printf("L %c %lu %lu %lu\n",firstsucc ? '1' : '0',
+  printf("L %c GT_WU GT_WU GT_WU\n",firstsucc ? '1' : '0',
                               fatherdepth,father->left,leafnumber);
   return 0;
 }
@@ -165,44 +164,42 @@ static int gt_enumlcpvalues(bool outedges,
 
 static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
 {
-  printf("N %lu %lu %lu\n",lcpinterval->offset,
+  printf("N GT_WU GT_WU GT_WU\n",lcpinterval->offset,
                            lcpinterval->left,
                            lcpinterval->right);
   return 0;
 }
 
-
-
 int gt_runsmaxlcpvalues(GtStr *inputindex,
-						GtUword searchlength,
-            bool absolute,
-						bool silent,
-            GT_UNUSED bool outedges,
-            bool bottomup,
-            GtLogger *logger,
-            GtError *err)
+    GtUword searchlength,
+    bool absolute,
+    bool silent,
+    GT_UNUSED bool outedges,
+    bool bottomup,
+    GtLogger *logger,
+    GtError *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
-	GtTimer *smaxprogress = NULL;
+  GtTimer *smaxprogress = NULL;
   gt_error_check(err);
   ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(inputindex),
                                                    SARR_LCPTAB |
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB,
                                                    false,
-                                                   //SEQ_scan,
+                                                   /*SEQ_scan,*/
                                                    logger,
                                                    err);
 
-	gt_showtime_enable();
-	if (gt_showtime_enabled())
+  gt_showtime_enable();
+  if (gt_showtime_enabled())
   {
-		smaxprogress = gt_timer_new_with_progress_description("attempting to find supermaximal repeats");
-		gt_timer_start(smaxprogress);
-	}
+    smaxprogress = gt_timer_new_with_progress_description(
+        "finding supermaximal repeats");
+    gt_timer_start(smaxprogress);
+  }
 
-  
   if (ssar == NULL)
   {
     haserr = true;
@@ -211,7 +208,8 @@ int gt_runsmaxlcpvalues(GtStr *inputindex,
   {
     if (bottomup)
     {
-      GtESAVisitor *elv = gt_esa_smax_lcpitvs_visitor_new(ssar, searchlength, absolute, silent, smaxprogress);
+      GtESAVisitor *elv = gt_esa_smax_lcpitvs_visitor_new(
+          ssar, searchlength, absolute, silent, smaxprogress);
       if (gt_esa_bottomup(ssar, elv, err) != 0)
       {
 //        printf("gt_esa_bottomup called\n");
@@ -227,26 +225,24 @@ int gt_runsmaxlcpvalues(GtStr *inputindex,
       {
         printf("gt_enumlcpvalues called\n");
         haserr = true;
-      }      
-    }    
+      }
+    }
   }
   if (ssar != NULL)
   {
     gt_freeSequentialsuffixarrayreader(&ssar);
   }
 
-//	printf("SMAXPROGRESS\n");
   if (smaxprogress != NULL)
-	{
-//gt_timer_show_progress(smaxprogress,"%ld.%06lds real %lds user %lds system", stdout);
-		gt_timer_show_progress_final(smaxprogress, stdout);
-		gt_timer_delete(smaxprogress);
+  {
+/* gt_timer_show_progress(smaxprogress,"%GT_WD.%06GT_WDs real %GT_WDs
+ * user %GT_WDs system", stdout); */
+    gt_timer_show_progress_final(smaxprogress, stdout);
+    gt_timer_delete(smaxprogress);
   }
-
 
   return haserr ? -1 : 0;
 }
-
 
 static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
                              unsigned int mode,GtError *err)
@@ -307,8 +303,8 @@ static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
   }
   if (!haserr)
   {
-    printf("sumsuftab=%lu\n",sumsuftab);
-    printf("sumlcptab=%lu\n",sumlcptab);
+    printf("sumsuftab=GT_WU\n",sumsuftab);
+    printf("sumlcptab=GT_WU\n",sumlcptab);
   }
   return haserr ? -1 : 0;
 }

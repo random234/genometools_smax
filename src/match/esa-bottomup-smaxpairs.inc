@@ -33,26 +33,21 @@ static void initBUinfo_smaxpairs(GtBUinfo_smaxpairs *,GtBUstate_smaxpairs *);
 static void freeBUinfo_smaxpairs(GtBUinfo_smaxpairs *,GtBUstate_smaxpairs *);
 
 static int processleafedge_smaxpairs(bool,
-    unsigned long,
+    GtUword,
     GtBUinfo_smaxpairs *,
-    unsigned long, /* seqnum */
-    unsigned long, /* relpos */
+    GtUword, /* seqnum */
+    GtUword, /* relpos */
     GtBUstate_smaxpairs *,
     GtError *err);
 
 static int processbranchingedge_smaxpairs(bool firstsucc,
-    unsigned long,
+    GtUword,
     GtBUinfo_smaxpairs *,
-    unsigned long,
-    unsigned long,
+    GtUword,
+    GtUword,
     GtBUinfo_smaxpairs *,
     GtBUstate_smaxpairs *,
     GtError *);
-
-//~ static int processlcpinterval_smaxpairs(unsigned long,
-    //~ GtBUinfo_smaxpairs *,
-    //~ GtBUstate_smaxpairs *,
-    //~ GtError *err);
 
 #define TOP_ESA_BOTTOMUP_smaxpairs\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -79,14 +74,14 @@ static int processbranchingedge_smaxpairs(bool firstsucc,
 
 typedef struct
 {
-  unsigned long lcp, lb, rb;
+  GtUword lcp, lb, rb;
   GtBUinfo_smaxpairs info;
 } GtBUItvinfo_smaxpairs;
 
 typedef struct
 {
   GtBUItvinfo_smaxpairs *spaceGtBUItvinfo;
-  unsigned long allocatedGtBUItvinfo,
+  GtUword allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
 } GtArrayGtBUItvinfo_smaxpairs;
 
@@ -102,7 +97,7 @@ GtArrayGtBUItvinfo_smaxpairs *gt_GtArrayGtBUItvinfo_new_smaxpairs(void)
 void gt_GtArrayGtBUItvinfo_delete_smaxpairs(GtArrayGtBUItvinfo_smaxpairs *stack,
                                   GtBUstate_smaxpairs *state)
 {
-  unsigned long idx;
+  GtUword idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
@@ -112,12 +107,13 @@ void gt_GtArrayGtBUItvinfo_delete_smaxpairs(GtArrayGtBUItvinfo_smaxpairs *stack,
   gt_free(stack);
 }
 
-static GtBUItvinfo_smaxpairs *allocateBUstack_smaxpairs(GtBUItvinfo_smaxpairs *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
-                                   GtBUstate_smaxpairs *state)
+static GtBUItvinfo_smaxpairs *allocateBUstack_smaxpairs(
+  GtBUItvinfo_smaxpairs *ptr,
+  GtUword currentallocated,
+  GtUword allocated,
+  GtBUstate_smaxpairs *state)
 {
-  unsigned long idx;
+  GtUword idx;
   GtBUItvinfo_smaxpairs *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
@@ -135,8 +131,8 @@ static int gt_esa_bottomup_smaxpairs(Sequentialsuffixarrayreader *ssar,
                     const GtSeqnumrelpos *snrp,
                     GtError *err)
 {
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
+  const GtUword incrementstacksize = 32UL;
+  GtUword lcpvalue,
                 previoussuffix = 0,
                 idx,
                 numberofsuffixes,
@@ -179,13 +175,6 @@ static int gt_esa_bottomup_smaxpairs(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_smaxpairs;
       lastinterval->rb = idx;
-      //~ if (processlcpinterval_smaxpairs(lastinterval->lcp,
-                             //~ &lastinterval->info,
-                             //~ bustate,
-                             //~ err) != 0)
-      //~ {
-        //~ haserr = true;
-      //~ }
       if (lcpvalue <= TOP_ESA_BOTTOMUP_smaxpairs.lcp)
       {
         if (TOP_ESA_BOTTOMUP_smaxpairs.lcp > 0 || !firstedgefromroot)
@@ -214,8 +203,8 @@ static int gt_esa_bottomup_smaxpairs(Sequentialsuffixarrayreader *ssar,
     {
       if (lastinterval != NULL)
       {
-        unsigned long lastintervallb = lastinterval->lb;
-        unsigned long lastintervallcp = lastinterval->lcp,
+        GtUword lastintervallb = lastinterval->lb;
+        GtUword lastintervallcp = lastinterval->lcp,
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_smaxpairs(lcpvalue,lastintervallb);
         if (processbranchingedge_smaxpairs(true,
@@ -262,13 +251,6 @@ static int gt_esa_bottomup_smaxpairs(Sequentialsuffixarrayreader *ssar,
     } else
     {
       TOP_ESA_BOTTOMUP_smaxpairs.rb = idx;
-      //~ if (processlcpinterval_smaxpairs(TOP_ESA_BOTTOMUP_smaxpairs.lcp,
-                             //~ &TOP_ESA_BOTTOMUP_smaxpairs.info,
-                             //~ bustate,
-                             //~ err) != 0)
-      //~ {
-        //~ haserr = true;
-      //~ }
     }
   }
   gt_GtArrayGtBUItvinfo_delete_smaxpairs(stack,bustate);
