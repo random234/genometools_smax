@@ -171,7 +171,7 @@ static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
   return 0;
 }
 
-int gt_runsmaxlcpvalues(GtStr *inputindex,
+int gt_runsmaxlcpvalues(GtStrArray *inputindex,
     GtUword searchlength,
     bool absolute,
     bool silent,
@@ -184,14 +184,15 @@ int gt_runsmaxlcpvalues(GtStr *inputindex,
   Sequentialsuffixarrayreader *ssar;
   GtTimer *smaxprogress = NULL;
   gt_error_check(err);
-  ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(inputindex),
-                                                   SARR_LCPTAB |
-                                                   SARR_SUFTAB |
-                                                   SARR_ESQTAB,
-                                                   false,
-                                                   /*SEQ_scan,*/
-                                                   logger,
-                                                   err);
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
+        inputindex,0),
+      SARR_LCPTAB |
+      SARR_SUFTAB |
+      SARR_ESQTAB,
+      false,
+      /*SEQ_scan,*/
+      logger,
+      err);
 
   gt_showtime_enable();
   if (gt_showtime_enabled())

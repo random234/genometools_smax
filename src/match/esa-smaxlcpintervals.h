@@ -21,8 +21,8 @@
 #include "core/logger_api.h"
 #include "core/error_api.h"
 
-int gt_runsmaxlcpvalues(GtStr *,GtUword, bool, bool, bool, bool, GtLogger *,
-    GtError *);
+int gt_runsmaxlcpvalues(GtStrArray *,GtUword, bool, bool, bool, bool,
+    GtLogger *, GtError *);
 
 int gt_smax_runscanesa(const char *inputindex, unsigned int mode,
                   GtLogger *logger,GtError *err);

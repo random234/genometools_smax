@@ -160,7 +160,6 @@
 #include "tools/gt_unique_encseq.h"
 #include "tools/gt_unique_encseq_extract.h"
 #include "tools/gt_smax.h"
-#include "tools/gt_linsmax.h"
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
@@ -261,8 +260,6 @@ GtToolbox* gtt_tools(void)
 #endif
 
 	gt_toolbox_add_tool(tools, "smax", gt_smax());
-  gt_toolbox_add_tool(tools, "linsmax", gt_linsmax());
-
 
   return tools;
 }
