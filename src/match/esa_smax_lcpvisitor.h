@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_LCPSMAXINTERVALS_VISITOR_H
-#define ESA_LCPSMXAINTERVALS_VISITOR_H
+#ifndef ESA_SMAX_LCPVISITOR_H
+#define ESA_SMAX_LCPVISITOR_H
 
 #include "match/esa_visitor.h"
 #include "core/str_api.h"
@@ -27,8 +27,9 @@ typedef struct GtESASmaxLcpintervalsVisitor GtESASmaxLcpintervalsVisitor;
 const GtESAVisitorClass* gt_esa_smax_lcpitvs_visitor_class(void);
 GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(Sequentialsuffixarrayreader *,
     GtUword, bool, bool, GtTimer *);
+void gt_esa_smax_print_repeat(GtEncseq *, GtUword, GtUword, GtUword, GtUword,
+    GtUword, char, bool);
 bool verify_supmax(GtESASmaxLcpintervalsVisitor *, GtUword, GtUword);
-bool lcp_local_max(GtUword , GtUword , GtUword , const Suffixarray *);
 bool gt_esa_smax_lcpitvs_visitor_get_info(GtESAVisitorInfo *);
 void gt_esa_smax_lcpitvs_visitor_set_info(GtESAVisitorInfo *, bool);
 

@@ -52,8 +52,8 @@ sa = gt_suffixarraySequentialsuffixarrayreader(ssar);
 gt_showtime_enable();
 if (gt_showtime_enabled())
 {
-  linsmaxprogress = gt_timer_new_with_progress_description("attempting to
-      find supermaximal repeats");
+  linsmaxprogress = gt_timer_new_with_progress_description
+    ("finding supermaximal repeats");
   gt_timer_start(linsmaxprogress);
 }
 nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
@@ -77,6 +77,8 @@ gt_queue_add(suftab_queue, (GtUword*) previoussuffix); */
 /* printf("adding GT_WU \n", previoussuffix); */
   gt_queue_add(suftab_queue, (GtUword*) previoussuffix);
 /* printf("size: GT_WU \n",gt_queue_size(suftab_queue)); */
+
+  max = -1;
   if (lcpvalue > max)
   {
     max = lcpvalue;
@@ -104,7 +106,7 @@ gt_queue_add(suftab_queue, (GtUword*) previoussuffix); */
         rb = (GtUword) gt_queue_get(suftab_queue);
         /* rb_seq_pos = (GtUword) gt_queue_get(suftab_queue); */
         /* rb_seq_num = (GtUword) gt_queue_get(suftab_queue); */
-        printf("%2GT_WU %3GT_WU %3c %2GT_WU %2GT_WU\n",max, lb, method,
+        printf("" GT_WU "" GT_WU " %3c " GT_WU "" GT_WU "\n",max, lb, method,
             max, rb);
 /*
         printf("lb: GT_WU \n", lb);
