@@ -170,13 +170,14 @@ bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb, GtUword rb) {
   sa = gt_suffixarraySequentialsuffixarrayreader(lev->ssar);
   suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
   gt_esa_marktab_reset(lev->marktab);
-
   for (i=lb;i<=rb;i++)
   {
+//    printf("SUF; " GT_WU "\n",suftab[i]);
     if (suftab[i] > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(sa->encseq,suftab[i]-1,
           GT_READMODE_FORWARD);
+//      printf("cc: %u\n",cc);
       if (ISNOTSPECIAL(cc))
       {
         if (gt_esa_marktab_get(lev->marktab,cc))
