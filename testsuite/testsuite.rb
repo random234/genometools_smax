@@ -224,6 +224,7 @@ require 'gt_unique_encseq_include'
 if not $arguments["nocairo"] then
   require 'gt_sketch_include'
 end
+require 'gt_smax_include'
 
 #now the test cases for the tools implemented or supervised by SK.
 

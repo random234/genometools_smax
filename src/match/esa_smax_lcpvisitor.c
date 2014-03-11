@@ -144,6 +144,7 @@ void gt_esa_smax_print_repeat(GtEncseq *encseq, GtUword lcp, GtUword suftab_s,
   {
     gt_esa_smax_print_repeat(encseq, lcp,suftab_t,suftab_s, seqnum_t, seqnum_s,
         method, absolute);
+    return;
   }
 
   if (absolute)
@@ -164,8 +165,6 @@ void gt_esa_smax_print_repeat(GtEncseq *encseq, GtUword lcp, GtUword suftab_s,
 bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb, GtUword rb) {
   const GtUword *suftab;
   const Suffixarray *sa;
-/*  bool marktab[GT_DNAALPHASIZE]; nur einmal allokieren und zwar
- *  entsprechend der Alphabetgr"osse */
   int i;
   sa = gt_suffixarraySequentialsuffixarrayreader(lev->ssar);
   suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
