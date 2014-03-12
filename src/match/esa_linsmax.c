@@ -31,7 +31,6 @@ int gt_runlinsmax(GtStrArray *inputindex,
     GtLogger *logger,
     GtError *err)
 {
-  gt_assert(inputindex);
   bool haserr = false;
   GT_UNUSED Sequentialsuffixarrayreader *ssar;
   GtTimer *linsmaxprogress = NULL;

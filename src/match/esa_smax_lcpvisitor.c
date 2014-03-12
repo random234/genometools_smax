@@ -80,7 +80,7 @@ static int gt_esa_smax_lcpitvs_visitor_processbranchingedge(
     GT_UNUSED bool firstsucc,
     GT_UNUSED GtUword fd,
     GT_UNUSED GtUword flb,
-    GT_UNUSED GtESAVisitorInfo *finfo,
+    GtESAVisitorInfo *finfo,
     GT_UNUSED GtUword sd,
     GT_UNUSED GtUword slb,
     GT_UNUSED GtUword srb,
@@ -89,8 +89,6 @@ static int gt_esa_smax_lcpitvs_visitor_processbranchingedge(
 {
   GtLcpmaxintervalinfo *ret_info = (GtLcpmaxintervalinfo *) finfo;
   ret_info->maxlcpinterval = false;
-//  gt_timer_show_progress(lev->smaxprogress,"visiting branch", stdout);
-//  gt_esa_smax_lcpitvs_visitor_set_info(finfo, false);
   return 0;
 }
 
@@ -171,12 +169,10 @@ bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb, GtUword rb) {
   gt_esa_marktab_reset(lev->marktab);
   for (i=lb;i<=rb;i++)
   {
-//    printf("SUF; " GT_WU "\n",suftab[i]);
     if (suftab[i] > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(sa->encseq,suftab[i]-1,
           GT_READMODE_FORWARD);
-//      printf("cc: %u\n",cc);
       if (ISNOTSPECIAL(cc))
       {
         if (gt_esa_marktab_get(lev->marktab,cc))
