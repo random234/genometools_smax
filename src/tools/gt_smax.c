@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "tools/gt_smax.h"
 #include "match/esa-smaxlcpintervals.h"
-#include "match/esa_linsmax.h"
+#include "match/esa-smax-scan.h"
 #include "core/error.h"
 #include "core/logger.h"
 

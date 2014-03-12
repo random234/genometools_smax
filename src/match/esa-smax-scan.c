@@ -19,7 +19,7 @@
 #include "core/encseq_api.h"
 #include "core/str_api.h"
 #include "core/showtime.h"
-#include "match/esa_linsmax.h"
+#include "match/esa-smax-scan.h"
 #include "core/queue_api.h"
 #include "esa-marktab.h"
 

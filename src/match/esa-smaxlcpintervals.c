@@ -16,7 +16,7 @@
 */
 
 #include "lcpinterval.h"
-#include "esa_smax_lcpvisitor.h"
+#include "esa-smax-map.h"
 #include "esa-seqread.h"
 #include "esa-bottomup.h"
 #include "core/encseq_api.h"

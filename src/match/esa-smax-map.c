@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "core/log_api.h"
 #include "esa_visitor_rep.h"
-#include "esa_smax_lcpvisitor.h"
+#include "esa-smax-map.h"
 #include "esa-seqread.h"
 #include "esa-marktab.h"
 
@@ -139,16 +139,16 @@ void gt_esa_smax_print_repeat(const GtEncseq *encseq, GtUword maxlen, GtUword su
 
   if (absolute)
   {
-    printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",lcp,
-        suftab_s, method, lcp, suftab_t,score);
+    printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
+        suftab_s, method, maxlen, suftab_t,score);
   } else
-  {
+  { 
     GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t),
             pos_corr_s = gt_encseq_seqstartpos(encseq, seqnum_s);
 
     printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU " "
-        GT_WU "\n",lcp, seqnum_s, suftab_s-pos_corr_s, method, lcp, seqnum_t,
-        suftab_t-pos_corr_t,lcp+lcp);
+        GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method, maxlen, seqnum_t,
+        suftab_t-pos_corr_t,score);
   }
 }
 
