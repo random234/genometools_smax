@@ -67,8 +67,6 @@ static int gt_esa_smax_lcpitvs_visitor_processleafedge(
     GtUword leafnumber,
     GT_UNUSED GtError *err)
 {
-gt_log_log("Leaf exit_code: %c fd:" GT_WU " flb:" GT_WU " leafnumber:" GT_WU
-    "\n", firstsucc ? '1' : '0', fd, flb, leafnumber);
   if (firstsucc)
   {
     ((GtLcpmaxintervalinfo *) info)->maxlcpinterval = true;

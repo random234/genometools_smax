@@ -29,7 +29,7 @@ typedef struct {
   GtUword ulong_option_searchlength;
   bool bool_option_absolute;
   bool bool_option_silent;
-  bool bool_option_linear;
+  bool bool_option_map;
 } SmaxArguments;
 
 static void* gt_smax_arguments_new(void)
@@ -66,7 +66,7 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op,option);
 
   /* string */
-  option = gt_option_new_string_array("esa",
+  option = gt_option_new_string_array("ii",
       "Please specify a valid index or indizes",
       arguments->index_option_smax);
   gt_option_parser_add_option(op,option);
@@ -86,8 +86,8 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
       &arguments->bool_option_silent,false);
   gt_option_parser_add_option(op,option);
 
-  option = gt_option_new_bool("linear", "Use linear scan implementation",
-      &arguments->bool_option_linear,false);
+  option = gt_option_new_bool("map", "Use map scan implementation",
+      &arguments->bool_option_map,false);
   gt_option_parser_add_option(op,option);
   return op;
 }
@@ -102,7 +102,8 @@ static int gt_smax_arguments_check(GT_UNUSED int rest_argc,
   gt_assert(arguments);
 
   if (gt_str_array_size(arguments->index_option_smax) == 0) {
-    printf("Indexname must not be empty\n");
+    printf("option -ii is mandatory\n");
+    had_err = 1;
   }
   return had_err;
 }
@@ -134,18 +135,17 @@ static int gt_smax_runner(int argc, const char **argv, int parsed_args,
                         GtLogger *logger,
                         GtError *err);
   */
-  if (arguments->bool_option_linear)
-  {
-    gt_runlinsmax(arguments->index_option_smax,
-        arguments->ulong_option_searchlength,arguments->bool_option_absolute,
-        arguments->bool_option_silent, true, logger, err);
-
-  } else
+  if (arguments->bool_option_map)
   {
     gt_runsmaxlcpvalues(arguments->index_option_smax,
         arguments->ulong_option_searchlength,
         arguments->bool_option_absolute,
         arguments->bool_option_silent, true, true, logger, err);
+  } else
+  {
+    gt_runlinsmax(arguments->index_option_smax,
+        arguments->ulong_option_searchlength,arguments->bool_option_absolute,
+        arguments->bool_option_silent, true, logger, err);
   }
   gt_logger_delete(logger);
   return had_err;
