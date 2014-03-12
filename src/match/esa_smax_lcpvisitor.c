@@ -60,11 +60,11 @@ static void gt_esa_smax_lcpitvs_visitor_delete_info(GtESAVisitorInfo *vi,
 
 static int gt_esa_smax_lcpitvs_visitor_processleafedge(
     GT_UNUSED GtESAVisitor *ev,
-    GT_UNUSED bool firstsucc,
-    GT_UNUSED GtUword fd,
-    GT_UNUSED GtUword flb,
-    GT_UNUSED GtESAVisitorInfo *info,
-    GT_UNUSED GtUword leafnumber,
+    bool firstsucc,
+    GtUword fd,
+    GtUword flb,
+    GtESAVisitorInfo *info,
+    GtUword leafnumber,
     GT_UNUSED GtError *err)
 {
 gt_log_log("Leaf exit_code: %c fd:" GT_WU " flb:" GT_WU " leafnumber:" GT_WU
