@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_SMAX_LCPVISITOR_H
-#define ESA_SMAX_LCPVISITOR_H
+#ifndef ESA_SMAX_MAP_H
+#define ESA_SMAX_MAP_H
 
 #include "match/esa_visitor.h"
 #include "core/str_api.h"

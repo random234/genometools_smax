@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_LINSMAX_H
-#define ESA_LINSMAX_H
+#ifndef ESA_SMAX_SCAN_H
+#define ESA_SMAX_SCAN_H
 
 #include "core/logger_api.h"
 #include "core/error_api.h"
@@ -26,7 +26,5 @@
 
 inline int gt_runlinsmax(GtStrArray *,GtUword, bool, bool, bool,
     GtLogger *, GtError *);
-inline bool gt_linsmax_verify_supmax(Sequentialsuffixarrayreader *,
-    GtQueue *, GtESAMarkTab *);
 
 #endif

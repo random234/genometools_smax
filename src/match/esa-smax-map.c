@@ -60,11 +60,11 @@ static void gt_esa_smax_lcpitvs_visitor_delete_info(GtESAVisitorInfo *vi,
 
 static int gt_esa_smax_lcpitvs_visitor_processleafedge(
     GT_UNUSED GtESAVisitor *ev,
-    bool firstsucc,
-    GtUword fd,
-    GtUword flb,
+    GT_UNUSED bool firstsucc,
+    GT_UNUSED GtUword fd,
+    GT_UNUSED GtUword flb,
     GtESAVisitorInfo *info,
-    GtUword leafnumber,
+    GT_UNUSED GtUword leafnumber,
     GT_UNUSED GtError *err)
 {
   if (firstsucc)
@@ -117,9 +117,9 @@ static bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb,
   return true;
 }
 
-void gt_esa_smax_print_repeat(const GtEncseq *encseq, GtUword maxlen, GtUword suftab_s,
-    GtUword suftab_t, char method,
-    bool absolute)
+void gt_esa_smax_print_repeat(const GtEncseq *encseq, GtUword maxlen,
+                              GtUword suftab_s, GtUword suftab_t,
+                              char method, bool absolute)
 {
   GtUword score = maxlen * 2;
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
@@ -140,13 +140,13 @@ void gt_esa_smax_print_repeat(const GtEncseq *encseq, GtUword maxlen, GtUword su
     printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
         suftab_s, method, maxlen, suftab_t,score);
   } else
-  { 
+  {
     GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t),
             pos_corr_s = gt_encseq_seqstartpos(encseq, seqnum_s);
 
-    printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU " "
-        GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method, maxlen, seqnum_t,
-        suftab_t-pos_corr_t,score);
+    printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " "
+        GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method,
+        maxlen, seqnum_t, suftab_t-pos_corr_t,score);
   }
 }
 

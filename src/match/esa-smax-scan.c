@@ -23,6 +23,43 @@
 #include "core/queue_api.h"
 #include "esa-marktab.h"
 
+static bool gt_linsmax_verify_supmax(Sequentialsuffixarrayreader *ssar,
+    GtQueue *suftab_queue, GtESAMarkTab *marktab)
+{
+  GT_UNUSED const GtUword *suftab;
+  GT_UNUSED const Suffixarray *sa;
+  GtUword i;
+  GtUword suf;
+  sa = gt_suffixarraySequentialsuffixarrayreader(ssar);
+  gt_esa_marktab_reset(marktab);
+
+  /* printf("size of array: " GT_WU "\n", gt_queue_size(suftab_queue)); */
+  /* push lb seq_pos
+     * push lb seq_num */
+/*  printf("verify_supmax called\n"); */
+  for (i = 0;i<gt_queue_size(suftab_queue);i++)
+  {
+    suf = (GtUword) gt_queue_get(suftab_queue);
+/*    printf("SUF: " GT_WU "\n", suf); */
+    if (suf > 0)
+    {
+      GtUchar cc = gt_encseq_get_encoded_char(sa->encseq,suf-1,
+          GT_READMODE_FORWARD);
+/*      printf("cc: %u \n",cc); */
+      if (ISNOTSPECIAL(cc))
+      {
+        if (gt_esa_marktab_get(marktab,cc))
+        {
+          return false;
+        }
+        gt_esa_marktab_set(marktab,cc);
+      }
+    }
+    gt_queue_add(suftab_queue, (GtUword*) suf);
+  }
+  return true;
+}
+
 int gt_runlinsmax(GtStrArray *inputindex,
     GT_UNUSED GtUword searchlength,
     GT_UNUSED bool absolute,
@@ -147,41 +184,4 @@ int gt_runlinsmax(GtStrArray *inputindex,
   gt_queue_delete(suftab_queue);
   gt_esa_marktab_delete(marktab);
   return haserr ? -1 : 0;
-}
-
-bool gt_linsmax_verify_supmax(Sequentialsuffixarrayreader *ssar,
-    GtQueue *suftab_queue, GtESAMarkTab *marktab)
-{
-  GT_UNUSED const GtUword *suftab;
-  GT_UNUSED const Suffixarray *sa;
-  GtUword i;
-  GtUword suf;
-  sa = gt_suffixarraySequentialsuffixarrayreader(ssar);
-  gt_esa_marktab_reset(marktab);
-
-  /* printf("size of array: " GT_WU "\n", gt_queue_size(suftab_queue)); */
-    /* push lb seq_pos
-     * push lb seq_num */
-/*  printf("verify_supmax called\n"); */
-  for (i = 0;i<gt_queue_size(suftab_queue);i++)
-  {
-    suf = (GtUword) gt_queue_get(suftab_queue);
-/*    printf("SUF: " GT_WU "\n", suf); */
-    if (suf > 0)
-    {
-      GtUchar cc = gt_encseq_get_encoded_char(sa->encseq,suf-1,
-          GT_READMODE_FORWARD);
-/*      printf("cc: %u \n",cc); */
-      if (ISNOTSPECIAL(cc))
-      {
-        if (gt_esa_marktab_get(marktab,cc))
-        {
-          return false;
-        }
-        gt_esa_marktab_set(marktab,cc);
-      }
-    }
-    gt_queue_add(suftab_queue, (GtUword*) suf);
-  }
-  return true;
 }

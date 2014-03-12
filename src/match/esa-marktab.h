@@ -12,5 +12,3 @@ void gt_esa_marktab_reset(GtESAMarkTab *);
 void gt_esa_marktab_delete(GtESAMarkTab *);
 
 #endif
-
-
