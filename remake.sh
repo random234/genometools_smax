@@ -1,3 +1,3 @@
 #!/bin/sh
 clear
-CC="ccache gcc" make curses=no cairo=yes noopt=yes
+CC="ccache gcc" make curses=no with-sqlite=no cairo=no 64bit=no
