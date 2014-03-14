@@ -23,7 +23,7 @@
 #include "core/queue_api.h"
 #include "esa-marktab.h"
 
-static bool gt_linsmax_verify_supmax(const GtEncseq *encseq,
+static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
     GtArray *suftab_arr, GtESAMarkTab *marktab)
 {
   GtUword i;
@@ -48,6 +48,40 @@ static bool gt_linsmax_verify_supmax(const GtEncseq *encseq,
     }
   }
   return true;
+}
+
+
+void gt_smaxscan_print_repeat(const GtEncseq *encseq, GtUword maxlen,
+                              GtUword suftab_s, GtUword suftab_t,
+                              char method, bool absolute)
+{
+  GtUword score = maxlen * 2;
+  GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
+  GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
+  if (suftab_s > suftab_t)
+  {
+    GtUword tmp;
+    tmp = suftab_s;
+    suftab_s = suftab_t;
+    suftab_t = tmp;
+    tmp = seqnum_s;
+    seqnum_s = seqnum_t;
+    seqnum_t = tmp;
+  }
+
+  if (absolute)
+  {
+    printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
+        suftab_s, method, maxlen, suftab_t,score);
+  } else
+  {
+    GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t),
+            pos_corr_s = gt_encseq_seqstartpos(encseq, seqnum_s);
+
+    printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " "
+        GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method,
+        maxlen, seqnum_t, suftab_t-pos_corr_t,score);
+  }
 }
 
 int gt_runlinsmax(GtStrArray *inputindex,
@@ -127,15 +161,19 @@ int gt_runlinsmax(GtStrArray *inputindex,
       {
         /* push previoussuffix check local maxima and flush queue*/
         gt_array_add(suftab_arr,previoussuffix);
-        if (gt_linsmax_verify_supmax(encseq, suftab_arr, marktab))
+        if (gt_smaxscan_verify_supmax(encseq, suftab_arr, marktab))
         {
           for (s = 0;s<gt_array_size(suftab_arr);s++)          
           {
             for (t = s+1;t<gt_array_size(suftab_arr);t++)
             {
-             printf("" GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU "\n",
-                  max, *(GtUword*) gt_array_get(suftab_arr,s), method, max,
-                  *(GtUword*) gt_array_get(suftab_arr,t), max*2);
+              if (!silent)
+              {
+                gt_smaxscan_print_repeat(encseq, max,
+                    *(GtUword*) gt_array_get( suftab_arr,s),
+                    *(GtUword*) gt_array_get(suftab_arr,t),
+                    method, absolute);
+              }
             }
           }
         }
