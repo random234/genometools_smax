@@ -40,12 +40,12 @@ static bool gt_linsmax_verify_supmax(Sequentialsuffixarrayreader *ssar,
   for (i = 0;i<gt_queue_size(suftab_queue);i++)
   {
     suf = (GtUword) gt_queue_get(suftab_queue);
-/*    printf("SUF: " GT_WU "\n", suf); */
+//    printf("SUF: " GT_WU "\t", suf); 
     if (suf > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(sa->encseq,suf-1,
           GT_READMODE_FORWARD);
-/*      printf("cc: %u \n",cc); */
+//      printf("cc: %u \t",cc); 
       if (ISNOTSPECIAL(cc))
       {
         if (gt_esa_marktab_get(marktab,cc))
@@ -69,10 +69,9 @@ int gt_runlinsmax(GtStrArray *inputindex,
     GtError *err)
 {
   bool haserr = false;
-  GT_UNUSED Sequentialsuffixarrayreader *ssar;
-  GtTimer *linsmaxprogress = NULL;
   gt_error_check(err);
-  ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
+  Sequentialsuffixarrayreader *ssar =
+    gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
         inputindex,0),
         SARR_LCPTAB |
         SARR_SUFTAB |
@@ -81,91 +80,109 @@ int gt_runlinsmax(GtStrArray *inputindex,
         /* SEQ_scan, */
         logger,
         err);
+  GtTimer *linsmaxprogress = NULL;
   GT_UNUSED const Suffixarray *sa;
-  char method = 'D';
+  GT_UNUSED char method = 'D';
   GT_UNUSED int pos_corr_t,pos_corr_s = 0;
   GT_UNUSED GtUword lcpvalue,
             previoussuffix,
             idx,
-            nonspecials,
+//            nonspecials,
+            seq_len,
             sumsuftab,
             sumlcptab,
-            max,
-            lb,
-            lb_seq_pos,
-            lb_seq_num,
-            rb,
-            rb_seq_pos,
-            rb_seq_num,
-            i;
+            max;
   GtESAMarkTab *marktab;
-  GtQueue *suftab_queue = NULL;
-  suftab_queue = gt_queue_new();
+  GtQueue *suftab_queue = gt_queue_new();
 
   sa = gt_suffixarraySequentialsuffixarrayreader(ssar);
   marktab = gt_esa_marktab_new(sa->encseq);
-  gt_showtime_enable();
-  if (gt_showtime_enabled())
-  {
-    linsmaxprogress = gt_timer_new_with_progress_description
-      ("finding supermaximal repeats");
-   gt_timer_start(linsmaxprogress);
-  }
-  nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-  max = 0;
-  for (idx = 0; idx < nonspecials; idx++)
+  seq_len = gt_Sequentialsuffixarrayreader_totallength(ssar);
+
+/*  for (idx = 0; idx < seq_len; idx++)
   {
     SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
-    sumlcptab += lcpvalue; /* silly but guarantees that loop is not eliminated
-                            by compiler */
+    sumlcptab += lcpvalue; 
+    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    sumsuftab += previoussuffix; 
+    printf("SUF: \t" GT_WU "\t",previoussuffix);
+    printf("LCP: \t" GT_WU "\n",lcpvalue);
+  }
+  
+  ssar = NULL;
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
+        inputindex,0),
+        SARR_LCPTAB |
+        SARR_SUFTAB |
+        SARR_ESQTAB,
+        false,
+        logger,
+        err);
+*/
+  GtUword queue_size;
+  unsigned int i = 0;
+  max = 0;
+  for (idx = 0; idx < seq_len; idx++)
+  {
+    SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
+    sumlcptab += lcpvalue; /* silly but guarantees that loop is not
+                              eliminated by compiler */
     SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     sumsuftab += previoussuffix; /* silly but guarantees that loop is not
                                   eliminated by compiler */
 
-    printf("LCP: " GT_WU "\n",lcpvalue);
-    gt_queue_add(suftab_queue, (GtUword*) previoussuffix);
-    if (lcpvalue >= max)
+      printf("current values: SUF: " GT_WU " LCP: " GT_WU "\n",
+          previoussuffix, lcpvalue);
+    if (lcpvalue > max)
     {
+      /* flush queue */
       max = lcpvalue;
-/* SOLANGE WEITERE MAXIMALE ELEMENTE GEFUNDEN WERDEN ELIMINIERE DIE
- * VORGAENGER */
-      if (gt_queue_size(suftab_queue) >= 2)
-      {
+//      printf("max: " GT_WU "\n",max);
+      queue_size = gt_queue_size(suftab_queue);      
+      for (i = 0;i<queue_size;i++)
+      { 
         gt_queue_get(suftab_queue);
       }
-    } else
+//      printf("queue flushed: " GT_WU "\n",gt_queue_size(suftab_queue));
+    } 
+    if (lcpvalue == max)
     {
-      /* gt_queue_add(suftab_queue, (GtUword*) previoussuffix); */
-      if (max>=searchlength)
+      /* push to queue */
+      gt_queue_add(suftab_queue, (GtUword*) previoussuffix);
+//      printf("added value SUF: " GT_WU " to queue\n", previoussuffix);
+    }
+    if (lcpvalue < max)
+    {
+      /* push previoussuffix check local maxima and flush queue*/
+//      printf("added value SUF: " GT_WU " to queue\n", previoussuffix);
+      gt_queue_add(suftab_queue, (GtUword*) previoussuffix);
+      if (gt_linsmax_verify_supmax(ssar, suftab_queue, marktab))
       {
-        if (gt_linsmax_verify_supmax(ssar, suftab_queue, marktab))
+//        printf("found supermaximal repeat\n");
+        GtUword lb = (GtUword) gt_queue_get(suftab_queue);
+        GtUword rb;
+        queue_size = gt_queue_size(suftab_queue);
+        for (i = 0;i<queue_size;i++)
         {
-        /* Laenge des Repeats, Startpos, Methode(Direct), Laenge des
-         * korrespondierenden Repeats, Startpos Sequenznummer wird nur bei
-         * relativer Positionsangabe verwendet */
-
-          lb = (GtUword) gt_queue_get(suftab_queue);
           rb = (GtUword) gt_queue_get(suftab_queue);
           printf("" GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU "\n",
-              max, lb, method, max, rb, max+max);
-
-          max=lcpvalue;
-          for (i = 0;i<gt_queue_size(suftab_queue);i++)
-          {
-            gt_queue_get(suftab_queue);
-          }
-//          gt_queue_add(suftab_queue, (GtUword*) previoussuffix);
-        } else
-        {
-          /* printf("found local maxima, not supermaximal\n"); */
-          max=lcpvalue;
-          for (i = 0;i<gt_queue_size(suftab_queue);i++)
-          {
-            gt_queue_get(suftab_queue);
-          }
-//          gt_queue_add(suftab_queue, (GtUword*) previoussuffix);
+                            max, lb, method, max, rb, 2*max);
+          lb = rb;
         }
+      } else
+      {
+//        printf("found local maxima, not supermaximal\n");
       }
+//      printf("QUEUE SIZE: " GT_WU "\n",gt_queue_size(suftab_queue));
+      queue_size = gt_queue_size(suftab_queue);
+      for (i = 0;i<queue_size;i++)
+      {
+        gt_queue_get(suftab_queue);
+//        printf("queue i: %d \n",i);
+      }
+//      printf("QUEUE flushed: " GT_WU "\n",gt_queue_size(suftab_queue));
+      max = 0;
+//      printf("max: " GT_WU "",max);
     }
   }
 
