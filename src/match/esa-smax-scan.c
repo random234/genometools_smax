@@ -50,7 +50,6 @@ static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
   return true;
 }
 
-
 void gt_smaxscan_print_repeat(const GtEncseq *encseq, GtUword maxlen,
                               GtUword suftab_s, GtUword suftab_t,
                               char method, bool absolute)
@@ -58,16 +57,6 @@ void gt_smaxscan_print_repeat(const GtEncseq *encseq, GtUword maxlen,
   GtUword score = maxlen * 2;
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
   GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
-  if (suftab_s > suftab_t)
-  {
-    GtUword tmp;
-    tmp = suftab_s;
-    suftab_s = suftab_t;
-    suftab_t = tmp;
-    tmp = seqnum_s;
-    seqnum_s = seqnum_t;
-    seqnum_t = tmp;
-  }
 
   if (absolute)
   {
@@ -85,9 +74,9 @@ void gt_smaxscan_print_repeat(const GtEncseq *encseq, GtUword maxlen,
 }
 
 int gt_runlinsmax(GtStrArray *inputindex,
-    GT_UNUSED GtUword searchlength,
-    GT_UNUSED bool absolute,
-    GT_UNUSED bool silent,
+    GtUword searchlength,
+    bool absolute,
+    bool silent,
     GT_UNUSED bool outedges,
     GtLogger *logger,
     GtError *err)
@@ -105,14 +94,11 @@ int gt_runlinsmax(GtStrArray *inputindex,
         logger,
         err);
   GtTimer *linsmaxprogress = NULL;
-  GT_UNUSED const Suffixarray *sa;
-  GT_UNUSED char method = 'D';
-  GT_UNUSED int pos_corr_t,pos_corr_s = 0;
-  GT_UNUSED GtUword lcpvalue,
+  char method = 'D';
+  GtUword lcpvalue,
             previoussuffix,
             idx,
             nonspecials,
-            seq_len,
             sumsuftab,
             sumlcptab,
             max;
@@ -142,28 +128,24 @@ int gt_runlinsmax(GtStrArray *inputindex,
     SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     sumsuftab += previoussuffix; /* silly but guarantees that loop is not
                                   eliminated by compiler */
-    /* check if we are currently in a lcp-interval */
     if (lcpvalue > max)
     {
-      /* flush queue */
       in_interval = true;
       max = lcpvalue;
       gt_array_reset(suftab_arr);
-    } 
+    }
     if (lcpvalue == max && in_interval)
     {
-      /* push to queue */
       gt_array_add(suftab_arr,previoussuffix);
     }
     if (lcpvalue < max)
     {
-      if (in_interval)
+      if (in_interval && max >= searchlength)
       {
-        /* push previoussuffix check local maxima and flush queue*/
         gt_array_add(suftab_arr,previoussuffix);
         if (gt_smaxscan_verify_supmax(encseq, suftab_arr, marktab))
         {
-          for (s = 0;s<gt_array_size(suftab_arr);s++)          
+          for (s = 0;s<gt_array_size(suftab_arr);s++)
           {
             for (t = s+1;t<gt_array_size(suftab_arr);t++)
             {
@@ -189,8 +171,6 @@ int gt_runlinsmax(GtStrArray *inputindex,
 
   if (linsmaxprogress != NULL)
   {
-/*     gt_timer_show_progress(smaxprogress,"%GT_WD.%06GT_WDs real %GT_WDs user
-     * %GT_WD system", stdout); */
     gt_timer_show_progress_final(linsmaxprogress, stdout);
     gt_timer_delete(linsmaxprogress);
   }

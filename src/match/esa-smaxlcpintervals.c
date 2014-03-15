@@ -68,7 +68,7 @@ int gt_runsmaxlcpvalues(GtStrArray *inputindex,
       if (gt_esa_bottomup(ssar, elv, err) != 0)
       {
         haserr = true;
-      } 
+      }
       gt_esa_visitor_delete(elv);
     }
   }
@@ -86,4 +86,3 @@ int gt_runsmaxlcpvalues(GtStrArray *inputindex,
   }
   return haserr ? -1 : 0;
 }
-
