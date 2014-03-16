@@ -57,7 +57,16 @@ void gt_smaxscan_print_repeat(const GtEncseq *encseq, GtUword maxlen,
   GtUword score = maxlen * 2;
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
   GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
-
+  if (suftab_s > suftab_t)
+  {
+    GtUword tmp;
+    tmp = suftab_s;
+    suftab_s = suftab_t;
+    suftab_t = tmp;
+    tmp = seqnum_s;
+    seqnum_s = seqnum_t;
+    seqnum_t = tmp;
+  }
   if (absolute)
   {
     printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
