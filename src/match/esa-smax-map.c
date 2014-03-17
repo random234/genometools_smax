@@ -17,7 +17,6 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
-#include "core/log_api.h"
 #include "esa_visitor_rep.h"
 #include "esa-smax-map.h"
 #include "esa-seqread.h"
