@@ -24,9 +24,9 @@
  */
 
 int gt_run_NE_repeats(GtStrArray *inputindex,
-    GtUword searchlength,
-    bool absolute,
-    bool silent,
+    GT_UNUSED GtUword searchlength,
+    GT_UNUSED bool absolute,
+    GT_UNUSED bool silent,
     GT_UNUSED bool outedges,
     GtLogger *logger,
     GtError *err)
@@ -44,7 +44,7 @@ int gt_run_NE_repeats(GtStrArray *inputindex,
         logger,
         err);
   GtTimer *nerepeat_progress = NULL;
-  char method = 'D';
+  GT_UNUSED char method = 'D';
   GT_UNUSED GtUword lcpvalue,
             previoussuffix,
             idx,
