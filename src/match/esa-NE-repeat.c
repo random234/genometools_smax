@@ -19,7 +19,7 @@
 #include "core/encseq_api.h"
 #include "core/showtime.h"
 
-/* vorraussichtlice Stackgroesse muss geschaetzt werden um 
+/* vorraussichtlice Stackgroesse muss geschaetzt werden um
  * konstante Stackgroesse sinnvoll zu waehlen.
  */
 

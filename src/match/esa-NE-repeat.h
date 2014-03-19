@@ -15,6 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef ESA_NE_REPEAT_H
+#define ESA_NE_REPEAT_H
+
 #include "esa-seqread.h"
 #include "core/encseq_api.h"
 #include "core/showtime.h"
@@ -22,3 +25,5 @@
 
 int gt_run_NE_repeats(GtStrArray *,GtUword ,bool,bool,GT_UNUSED bool outedges,
     GtLogger *,GtError *);
+
+#endif
