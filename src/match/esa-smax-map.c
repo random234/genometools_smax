@@ -160,12 +160,11 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
   GtUword s,t;
   char method = 'D';
   GtLcpmaxintervalinfo *ret_info = (GtLcpmaxintervalinfo *) info;
+  const GtEncseq *encseq = NULL;
+  const GtUword *suftab = NULL;
+
   gt_assert(ev && err);
-
   lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
-  const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(lev->ssar);
-  const GtUword *suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
-
   if (lcp >= lev->searchlength && ret_info->maxlcpinterval)
   {
     if (verify_supmax(lev,lb,rb))
@@ -176,8 +175,16 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
         {
           if (!lev->silent)
           {
+            if (encseq == NULL)
+            {
+              encseq = gt_encseqSequentialsuffixarrayreader(lev->ssar);
+            }
+            if (suftab == NULL)
+            {
+              suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
+            }
             gt_esa_smax_print_repeat(encseq, lcp, suftab[s], suftab[t],
-                method, lev->absolute);
+                                     method, lev->absolute);
           }
         }
       }

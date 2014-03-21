@@ -22,7 +22,7 @@
 #include "esa-marktab.h"
 
 static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
-    GtArray *suftab_arr, GtESAMarkTab *marktab)
+    const GtArray *suftab_arr, GtESAMarkTab *marktab)
 {
   GtUword i;
   GtUword suf;
@@ -31,6 +31,7 @@ static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
   for (i = 0;i<gt_array_size(suftab_arr);i++)
   {
     suf = *(GtUword*) gt_array_get(suftab_arr,i);
+    /* suf = suftab_arr->space_GtUlong[i]; */
     if (suf > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,
@@ -89,15 +90,13 @@ int gt_runlinsmax(GtStrArray *inputindex,
     GtError *err)
 {
   bool haserr = false;
-  gt_error_check(err);
   Sequentialsuffixarrayreader *ssar =
     gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
         inputindex,0),
         SARR_LCPTAB |
         SARR_SUFTAB |
         SARR_ESQTAB,
-        false,
-        /* SEQ_scan, */
+        true, /* scan suftab and lcptab */
         logger,
         err);
   GtTimer *linsmaxprogress = NULL;
@@ -106,14 +105,14 @@ int gt_runlinsmax(GtStrArray *inputindex,
             previoussuffix,
             idx,
             nonspecials,
-            sumsuftab,
-            sumlcptab,
             max;
   GtESAMarkTab *marktab;
   GtArray *suftab_arr = gt_array_new(sizeof(GtUword));
+  /* GT_ARRAYUlong suftab_arr; */
   bool in_interval = true;
 
   const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
+  gt_error_check(err);
   marktab = gt_esa_marktab_new(encseq);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
 
@@ -122,28 +121,25 @@ int gt_runlinsmax(GtStrArray *inputindex,
   {
     linsmaxprogress = gt_timer_new_with_progress_description(
         "finding supermaximal repeats");
-  gt_timer_start(linsmaxprogress);
+    gt_timer_start(linsmaxprogress);
   }
 
-  unsigned int s,t;
   max = 0;
   for (idx = 0; idx < nonspecials; idx++)
   {
     SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
-    sumlcptab += lcpvalue; /* silly but guarantees that loop is not
-                              eliminated by compiler */
     SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-    sumsuftab += previoussuffix; /* silly but guarantees that loop is not
-                                  eliminated by compiler */
     if (lcpvalue > max)
     {
       in_interval = true;
       max = lcpvalue;
       gt_array_reset(suftab_arr);
+      /* suftab_arr.nextfree_GtUlong = 0; */
     }
     if (lcpvalue == max && in_interval)
     {
       gt_array_add(suftab_arr,previoussuffix);
+      /* GT_STOREARRAY(&suftab_arr,GtUlong,32,previoussuffix); */
     }
     if (lcpvalue < max)
     {
@@ -152,14 +148,16 @@ int gt_runlinsmax(GtStrArray *inputindex,
         gt_array_add(suftab_arr,previoussuffix);
         if (gt_smaxscan_verify_supmax(encseq, suftab_arr, marktab))
         {
+          GtUword s;
           for (s = 0;s<gt_array_size(suftab_arr);s++)
           {
+            GtUword t;
             for (t = s+1;t<gt_array_size(suftab_arr);t++)
             {
               if (!silent)
               {
                 gt_smaxscan_print_repeat(encseq, max,
-                    *(GtUword*) gt_array_get( suftab_arr,s),
+                    *(GtUword*) gt_array_get(suftab_arr,s),
                     *(GtUword*) gt_array_get(suftab_arr,t),
                     method, absolute);
               }
@@ -167,12 +165,9 @@ int gt_runlinsmax(GtStrArray *inputindex,
           }
         }
       }
-      if (max > lcpvalue)
-      {
-        in_interval = false;
-      }
-      gt_array_reset(suftab_arr);
+      in_interval = false;
       max = lcpvalue;
+      gt_array_reset(suftab_arr);
     }
   }
 

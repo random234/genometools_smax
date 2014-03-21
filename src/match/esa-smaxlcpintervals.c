@@ -42,8 +42,7 @@ int gt_runsmaxlcpvalues(GtStrArray *inputindex,
       SARR_LCPTAB |
       SARR_SUFTAB |
       SARR_ESQTAB,
-      false,
-      /*SEQ_scan,*/
+      false, /* map suftab and lcptab */
       logger,
       err);
 
