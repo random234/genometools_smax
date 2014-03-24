@@ -19,14 +19,14 @@
 #include "core/encseq_api.h"
 #include "core/showtime.h"
 #include "match/esa-smax-scan.h"
-#include "esa-marktab.h"
+#include "core/bittab_api.h"
 
 static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
-    const GtArray *suftab_arr, GtESAMarkTab *marktab)
+    const GtArray *suftab_arr, GtBittab *marktab)
 {
   GtUword i;
   GtUword suf;
-  gt_esa_marktab_reset(marktab);
+  gt_bittab_unset(marktab);
 
   for (i = 0;i<gt_array_size(suftab_arr);i++)
   {
@@ -38,11 +38,11 @@ static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
           GT_READMODE_FORWARD);
       if (ISNOTSPECIAL(cc))
       {
-        if (gt_esa_marktab_get(marktab,cc))
+        if (gt_bittab_bit_is_set(marktab,cc))
         {
           return false;
         }
-        gt_esa_marktab_set(marktab,cc);
+        gt_bittab_set_bit(marktab,cc);
       }
     }
   }
@@ -106,14 +106,14 @@ int gt_runlinsmax(GtStrArray *inputindex,
             idx,
             nonspecials,
             max;
-  GtESAMarkTab *marktab;
+  GtBittab *marktab;
   GtArray *suftab_arr = gt_array_new(sizeof(GtUword));
   /* GT_ARRAYUlong suftab_arr; */
   bool in_interval = true;
 
   const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   gt_error_check(err);
-  marktab = gt_esa_marktab_new(encseq);
+  marktab = gt_bittab_new(gt_alphabet_size(gt_encseq_alphabet(encseq)));
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
 
   gt_showtime_enable();
@@ -182,6 +182,6 @@ int gt_runlinsmax(GtStrArray *inputindex,
     gt_freeSequentialsuffixarrayreader(&ssar);
   }
   gt_array_delete(suftab_arr);
-  gt_esa_marktab_delete(marktab);
+  gt_bittab_delete(marktab);
   return haserr ? -1 : 0;
 }

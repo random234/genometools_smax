@@ -20,7 +20,7 @@
 #include "esa_visitor_rep.h"
 #include "esa-smax-map.h"
 #include "esa-seqread.h"
-#include "esa-marktab.h"
+#include "core/bittab_api.h"
 
 struct GtESASmaxLcpintervalsVisitor {
   const GtESAVisitor parent_instance;
@@ -29,7 +29,7 @@ struct GtESASmaxLcpintervalsVisitor {
   GtTimer *smaxprogress;
   bool absolute;
   bool silent;
-  GtESAMarkTab *marktab;
+  GtBittab *marktab;
 };
 
 typedef struct
@@ -52,7 +52,7 @@ static void gt_esa_smax_lcpitvs_visitor_delete_info(GtESAVisitorInfo *vi,
                                                 GtESAVisitor *ev)
 {
   GtESASmaxLcpintervalsVisitor *lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
-  gt_esa_marktab_delete(lev->marktab);
+  gt_bittab_delete(lev->marktab);
   lev->marktab = NULL;
   gt_free(vi);
 }
@@ -91,27 +91,27 @@ static int gt_esa_smax_lcpitvs_visitor_processbranchingedge(
 
 static bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb,
                           GtUword rb)
-{
+ {
   GtUword idx;
   const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(lev->ssar);
   const GtUword *suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
 
-  gt_esa_marktab_reset(lev->marktab);
+  gt_bittab_unset(lev->marktab);
   for (idx=lb;idx<=rb;idx++)
-  {
+   {
     if (suftab[idx] > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(encseq,suftab[idx]-1,
                                               GT_READMODE_FORWARD);
       if (ISNOTSPECIAL(cc))
       {
-        if (gt_esa_marktab_get(lev->marktab,cc))
+        if (gt_bittab_bit_is_set(lev->marktab,cc))
         {
           return false;
         }
-        gt_esa_marktab_set(lev->marktab,cc);
-      }
-    }
+        gt_bittab_set_bit(lev->marktab,cc);
+       }
+     }
   }
   return true;
 }
@@ -213,7 +213,7 @@ const GtESAVisitorClass* gt_esa_smax_lcpitvs_visitor_class()
 GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
     Sequentialsuffixarrayreader *ssar, GtUword searchlength, bool absolute,
     bool silent, GtTimer *smaxprogress)
-{
+{ 
   GtESASmaxLcpintervalsVisitor *lev;
   GtESAVisitor *ev = gt_esa_visitor_create(gt_esa_smax_lcpitvs_visitor_class());
   lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
@@ -222,6 +222,6 @@ GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
   lev->absolute = absolute;
   lev->smaxprogress = smaxprogress;
   lev->silent = silent;
-  lev->marktab = gt_esa_marktab_new(ssar->encseq);
+  lev->marktab = gt_bittab_new(gt_alphabet_size(gt_encseq_alphabet(ssar->encseq)));
   return ev;
 }
