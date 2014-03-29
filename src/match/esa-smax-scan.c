@@ -15,12 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "esa-seqread.h"
 #include "core/encseq_api.h"
 #include "core/showtime.h"
-#include "match/esa-smax-scan.h"
 #include "core/bittab_api.h"
 #include "core/arraydef.h"
+#include "esa-seqread.h"
+#include "esa-smax-callbacks.h"
+#include "match/esa-smax-scan.h"
 
 static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
     const GtArrayGtUlong *suftab_arr, GtBittab *marktab)
@@ -51,6 +52,7 @@ static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
   return true;
 }
 
+/*
 void gt_smaxscan_print_repeat(const GtEncseq *encseq, GtUword maxlen,
                               GtUword suftab_s, GtUword suftab_t,
                               char method, bool absolute)
@@ -82,6 +84,8 @@ void gt_smaxscan_print_repeat(const GtEncseq *encseq, GtUword maxlen,
         maxlen, seqnum_t, suftab_t-pos_corr_t,score);
   }
 }
+*/
+
 
 int gt_runlinsmax(GtStrArray *inputindex,
     GtUword searchlength,
@@ -157,7 +161,7 @@ int gt_runlinsmax(GtStrArray *inputindex,
             {
               if (!silent)
               {
-                gt_smaxscan_print_repeat(encseq, max,
+                gt_esa_smax_print_repeat(encseq, max,
                                         suftab_arr.spaceGtUlong[s],
                                         suftab_arr.spaceGtUlong[t],
                                         method, absolute);

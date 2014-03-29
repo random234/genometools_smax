@@ -15,13 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_SMAX_SCAN_H
-#define ESA_SMAX_SCAN_H
+#ifndef ESA_SMAX_CALLBACKS_H
+#define ESA_SMAX_CALLBACKS_H
 
-#include "core/logger_api.h"
-#include "core/error_api.h"
+/*GT_UNUSED static bool gt_smax_verify_supmax(const GtEncseq *,
+            const GtArrayGtUlong *, GtBittab *); */
 
-inline int gt_runlinsmax(GtStrArray *,GtUword, bool, bool, bool,
-    GtLogger *, GtError *);
-
+void gt_esa_smax_print_repeat(const GtEncseq *,GtUword ,
+                              GtUword ,GtUword ,char ,bool);
 #endif
