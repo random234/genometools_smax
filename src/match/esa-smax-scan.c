@@ -26,19 +26,16 @@
 static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
     const GtArrayGtUlong *suftab_arr, GtBittab *marktab)
 {
-  GtUword i, array_size;
-  GtUword suf;
+  GtUword i;
   gt_bittab_unset(marktab);
-
   
-  array_size = suftab_arr->nextfreeGtUlong;
-  for (i = 0;i<array_size;i++)
+  for (i = 0;i<suftab_arr->nextfreeGtUlong;i++)
   {
-    suf = suftab_arr->spaceGtUlong[i];
+    GtUword suf = suftab_arr->spaceGtUlong[i];
     if (suf > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,
-          GT_READMODE_FORWARD);
+                                              GT_READMODE_FORWARD);
       if (ISNOTSPECIAL(cc))
       {
         if (gt_bittab_bit_is_set(marktab,cc))
@@ -111,7 +108,7 @@ int gt_runlinsmax(GtStrArray *inputindex,
             previoussuffix,
             idx,
             nonspecials,
-            max;
+            currentlcpmax;
   GtBittab *marktab;
   GtArrayGtUlong suftab_arr;
   const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
@@ -130,38 +127,37 @@ int gt_runlinsmax(GtStrArray *inputindex,
     gt_timer_start(linsmaxprogress);
   }
 
-  max = 0;
+  currentlcpmax = 0;
   for (idx = 0; idx < nonspecials; idx++)
   {
     SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
     SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-    if (lcpvalue > max)
+    if (lcpvalue > currentlcpmax)
     {
       in_interval = true;
-      max = lcpvalue;
+      currentlcpmax = lcpvalue;
       suftab_arr.nextfreeGtUlong = 0;
     }
-    if (lcpvalue == max && in_interval)
+    if (lcpvalue == currentlcpmax && in_interval)
     {
-      GT_STOREINARRAY(&suftab_arr,GtUlong,4,previoussuffix);
+      GT_STOREINARRAY(&suftab_arr,GtUlong,32,previoussuffix);
     }
-    if (lcpvalue < max)
+    if (lcpvalue < currentlcpmax)
     {
-      if (in_interval && max >= searchlength)
+      if (in_interval && currentlcpmax >= searchlength)
       {
-        GT_STOREINARRAY(&suftab_arr,GtUlong,0,previoussuffix);
+        GT_STOREINARRAY(&suftab_arr,GtUlong,32,previoussuffix);
         if (gt_smaxscan_verify_supmax(encseq, &suftab_arr, marktab))
         {
           GtUword s;
-          GtUword array_size = suftab_arr.nextfreeGtUlong;
-          for (s = 0;s<array_size;s++)
+          for (s = 0;s<suftab_arr.nextfreeGtUlong;s++)
           {
             GtUword t;
-            for (t = s+1;t<array_size;t++)
+            for (t = s+1;t<suftab_arr.nextfreeGtUlong;t++)
             {
               if (!silent)
               {
-                gt_esa_smax_print_repeat(encseq, max,
+                gt_esa_smax_print_repeat(encseq, currentlcpmax,
                                         suftab_arr.spaceGtUlong[s],
                                         suftab_arr.spaceGtUlong[t],
                                         method, absolute);
@@ -171,7 +167,7 @@ int gt_runlinsmax(GtStrArray *inputindex,
         }
       }
       in_interval = false;
-      max = lcpvalue;
+      currentlcpmax = lcpvalue;
       suftab_arr.nextfreeGtUlong = 0;
     }
   }
