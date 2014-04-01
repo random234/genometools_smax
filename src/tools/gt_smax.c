@@ -137,15 +137,21 @@ static int gt_smax_runner(int argc, const char **argv, int parsed_args,
   */
   if (arguments->bool_option_map)
   {
-    gt_runsmaxlcpvalues(arguments->index_option_smax,
+    if (gt_runsmaxlcpvalues(arguments->index_option_smax,
         arguments->ulong_option_searchlength,
         arguments->bool_option_absolute,
-        arguments->bool_option_silent, true, true, logger, err);
-  } else
+        arguments->bool_option_silent, true, true, logger, err) != 0)
+    {
+      had_err = true;
+    }
+  } else 
   {
-    gt_runlinsmax(arguments->index_option_smax,
+    if (gt_runlinsmax(arguments->index_option_smax,
         arguments->ulong_option_searchlength,arguments->bool_option_absolute,
-        arguments->bool_option_silent, true, logger, err);
+        arguments->bool_option_silent, true, logger, err) != 0)
+    {
+      had_err = true;
+    }
   }
   gt_logger_delete(logger);
   return had_err;
