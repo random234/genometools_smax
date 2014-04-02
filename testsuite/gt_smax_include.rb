@@ -1,71 +1,55 @@
-Name "gt smax map only index"
+Name "gt smax scan no index"
 Keywords "gt_smax"
 Test do 
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds no" +
-    " -lcp -des no -md5 no"   
-  run_test "#{$bin}gt smax -ii Random.fna -map"
+  run_test "#{$bin}gt smax -ii foo", :retval => 1 
 end
 
-Name "gt smax map absolute"
+Name "gt smax map no index"
 Keywords "gt_smax"
 Test do 
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds no" +
-    " -lcp -des no -md5 no"   
-  run_test "#{$bin}gt smax -ii Random.fna -absolute -map"
+  run_test "#{$bin}gt smax -ii foo -map", :retval => 1
 end
 
 Name "gt smax map diff absolute"
 Keywords "gt_smax"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds no" +
+  run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -suf -sds no" +
     " -lcp -des no -md5 no"
-  run_test "#{$bin}gt smax -ii Random.fna -absolute -l 2 -map"
+  run_test "#{$bin}gt smax -ii at1MB -absolute -l 50 -map"
   run_test "grep -v '# argv' #{last_stdout}"
-  run_test "diff #{last_stdout} #{$testdata}Random.fna_smax_absolute.out"
+  run_test "grep -v '# TIME' #{last_stdout}"
+  run_test "diff #{last_stdout} #{$testdata}at1MB_smax_absolute_l50.out"
 end
 
 Name "gt smax map diff relative"
 Keywords "gt_smax"
 Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds no" +
+  run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -suf -sds no" +
     " -lcp -des no -md5 no"
-  run_test "#{$bin}gt smax -ii Random.fna -l 2 -map"
+  run_test "#{$bin}gt smax -ii at1MB -l 50 -map"
   run_test "grep -v '# argv' #{last_stdout}"
-  run_test "diff #{last_stdout} #{$testdata}Random.fna_smax_relative.out"
-end
-
-Name "gt smax scan only index"
-Keywords "gt_smax"
-Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds no" +
-    " -lcp -des no -md5 no"   
-  run_test "#{$bin}gt smax -ii Random.fna"
-end
-  
-Name "gt smax scan absolute"
-Keywords "gt_smax"
-Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds no" +
-    " -lcp -des no -md5 no" 
-  run_test "#{$bin}gt smax -ii Random.fna -absolute"
+  run_test "grep -v '# TIME' #{last_stdout}"
+  run_test "diff #{last_stdout} #{$testdata}at1MB_smax_relative_l50.out"
 end
 
 Name "gt smax scan diff absolute"
 Keywords "gt_smax"
-Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds no" +
+ Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -suf -sds no" +
     " -lcp -des no -md5 no"
-  run_test "#{$bin}gt smax -ii Random.fna -absolute -l 2"
+  run_test "#{$bin}gt smax -ii at1MB -absolute -l 50"
   run_test "grep -v '# argv' #{last_stdout}"
-  run_test "diff #{last_stdout} #{$testdata}Random.fna_smax_absolute.out"
+  run_test "grep -v '# TIME' #{last_stdout}"
+  run_test "diff #{last_stdout} #{$testdata}at1MB_smax_absolute_l50.out"
 end
 
 Name "gt smax scan diff relative"
 Keywords "gt_smax"
-Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds no" +
+Test do 
+  run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -suf -sds no" +
     " -lcp -des no -md5 no"
-  run_test "#{$bin}gt smax -ii Random.fna -l 2"
+  run_test "#{$bin}gt smax -ii at1MB -l 50"
   run_test "grep -v '# argv' #{last_stdout}"
-  run_test "diff #{last_stdout} #{$testdata}Random.fna_smax_relative.out"
+  run_test "grep -v '# TIME' #{last_stdout}"
+  run_test "diff #{last_stdout} #{$testdata}at1MB_smax_relative_l50.out"
 end
