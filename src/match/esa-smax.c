@@ -1,4 +1,4 @@
-/*
+ /*
   Copyright (c) 2014 Philipp Lutz Carpus <random234@zbh.uni-hamburg.de>
   Copyright (c) 2014 Center for Bioinformatics, University of Hamburg
 
@@ -15,12 +15,31 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_SMAX_CALLBACKS_H
-#define ESA_SMAX_CALLBACKS_H
+#include "esa-smax.h"
+#include "core/encseq_api.h"
 
-/*GT_UNUSED static bool gt_smax_verify_supmax(const GtEncseq *,
-            const GtArrayGtUlong *, GtBittab *); */
+void gt_esa_smax_print(GtESASmaxPrintFunc print_func,
+                       void *data,
+                       const struct GtEncseq *encseq,
+                       GtUword maxlen,
+                       GtUword suftab_s,
+                       GtUword suftab_t,
+                       char method,
+                       bool absolute)
+{
+  if (print_func != NULL)
+  {
+    print_func(data,encseq,maxlen,suftab_s,suftab_t,method,absolute);
+  }
+}
 
-void gt_esa_smax_print_repeat(const GtEncseq *,GtUword ,
-                              GtUword ,GtUword ,char ,bool);
-#endif
+bool gt_esa_smax_verify_supmax(GtESASmaxVerifySupmaxFunc verifysupmax_func,
+                              void *data)
+{
+  if (verifysupmax_func != NULL)
+  {
+    return verifysupmax_func(data);
+  }
+  /* throw error */
+  return false;
+}

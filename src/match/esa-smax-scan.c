@@ -20,37 +20,43 @@
 #include "core/bittab_api.h"
 #include "core/arraydef.h"
 #include "esa-seqread.h"
-#include "esa-smax-callbacks.h"
+#include "esa-smax.h"
 #include "match/esa-smax-scan.h"
 
-static bool gt_smaxscan_verify_supmax(const GtEncseq *encseq,
-    const GtArrayGtUlong *suftab_arr, GtBittab *marktab)
+typedef struct {
+  const GtEncseq *encseq;
+  GtArrayGtUlong *suftab_arr;
+  GtBittab *marktab;
+} GtESASmaxVerifyInput;
+
+
+static bool scan_verify_supmax(void *data)
 {
+  GtESASmaxVerifyInput *input = (GtESASmaxVerifyInput*) data; 
   GtUword i;
-  gt_bittab_unset(marktab);
-  
-  for (i = 0;i<suftab_arr->nextfreeGtUlong;i++)
+  gt_bittab_unset(input->marktab);
+
+  for (i = 0;i<input->suftab_arr->nextfreeGtUlong;i++)
   {
-    GtUword suf = suftab_arr->spaceGtUlong[i];
+    GtUword suf = input->suftab_arr->spaceGtUlong[i];
     if (suf > 0)
     {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,
-                                              GT_READMODE_FORWARD);
+      GtUchar cc = gt_encseq_get_encoded_char(input->encseq,suf-1,
+                                             GT_READMODE_FORWARD);
       if (ISNOTSPECIAL(cc))
       {
-        if (gt_bittab_bit_is_set(marktab,cc))
+        if (gt_bittab_bit_is_set(input->marktab,cc))
         {
           return false;
         }
-        gt_bittab_set_bit(marktab,cc);
+        gt_bittab_set_bit(input->marktab,cc);
       }
     }
   }
   return true;
 }
 
-/*
-void gt_smaxscan_print_repeat(const GtEncseq *encseq, GtUword maxlen,
+void print_repeat_scan(GT_UNUSED void *data, const GtEncseq *encseq, GtUword maxlen,
                               GtUword suftab_s, GtUword suftab_t,
                               char method, bool absolute)
 {
@@ -81,7 +87,7 @@ void gt_smaxscan_print_repeat(const GtEncseq *encseq, GtUword maxlen,
         maxlen, seqnum_t, suftab_t-pos_corr_t,score);
   }
 }
-*/
+
 
 
 int gt_runlinsmax(GtStrArray *inputindex,
@@ -120,6 +126,9 @@ int gt_runlinsmax(GtStrArray *inputindex,
     GtArrayGtUlong suftab_arr;
     const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
     bool in_interval = true;
+    GtESASmaxVerifyInput *input = gt_malloc(sizeof(*input));
+    input->encseq = encseq;
+
     gt_error_check(err);
     marktab = gt_bittab_new(gt_alphabet_size(gt_encseq_alphabet(encseq)));
     nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
@@ -153,7 +162,10 @@ int gt_runlinsmax(GtStrArray *inputindex,
         if (in_interval && currentlcpmax >= searchlength)
         {
           GT_STOREINARRAY(&suftab_arr,GtUlong,32,previoussuffix);
-          if (gt_smaxscan_verify_supmax(encseq, &suftab_arr, marktab))
+          input->suftab_arr = &suftab_arr;
+          input->marktab = marktab;
+          if (gt_esa_smax_verify_supmax(scan_verify_supmax,input))
+          /*if (gt_smaxscan_verify_supmax(encseq, &suftab_arr, marktab))*/
           {
             GtUword s;
             for (s = 0;s<suftab_arr.nextfreeGtUlong;s++)
@@ -163,10 +175,17 @@ int gt_runlinsmax(GtStrArray *inputindex,
               {
                 if (!silent)
                 {
-                  gt_esa_smax_print_repeat(encseq, currentlcpmax,
+                  gt_esa_smax_print(print_repeat_scan, NULL, encseq,
+                                    currentlcpmax, 
+                                    suftab_arr.spaceGtUlong[s],
+                                    suftab_arr.spaceGtUlong[t],
+                                    method, absolute);
+
+/*                  esmax->print_func(esmax, encseq, currentlcpmax,
                                           suftab_arr.spaceGtUlong[s],
                                           suftab_arr.spaceGtUlong[t],
                                           method, absolute);
+*/
                 }
               }
             }
@@ -185,6 +204,7 @@ int gt_runlinsmax(GtStrArray *inputindex,
     }
     GT_FREEARRAY(&suftab_arr,GtUlong);
     gt_bittab_delete(marktab);
+    gt_free(input);
   }
   if (ssar != NULL)
   {

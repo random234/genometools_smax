@@ -21,7 +21,7 @@
 #include "esa-smax-map.h"
 #include "esa-seqread.h"
 #include "core/bittab_api.h"
-#include "match/esa-smax-callbacks.h"
+#include "esa-smax.h"
 
 struct GtESASmaxLcpintervalsVisitor {
   const GtESAVisitor parent_instance;
@@ -116,8 +116,8 @@ static bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb,
   }
   return true;
 }
-/*
-void gt_esa_smax_print_repeat(const GtEncseq *encseq, GtUword maxlen,
+
+void print_repeat_map(GT_UNUSED void *data, const GtEncseq *encseq, GtUword maxlen,
                               GtUword suftab_s, GtUword suftab_t,
                               char method, bool absolute)
 {
@@ -149,7 +149,6 @@ void gt_esa_smax_print_repeat(const GtEncseq *encseq, GtUword maxlen,
         maxlen, seqnum_t, suftab_t-pos_corr_t,score);
   }
 }
-*/
 
 static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
     GtUword lcp,
@@ -185,8 +184,9 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
             {
               suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
             }
-            gt_esa_smax_print_repeat(encseq, lcp, suftab[s], suftab[t],
-                                     method, lev->absolute);
+            gt_esa_smax_print(print_repeat_map, NULL, encseq,
+                              lcp, suftab[s], suftab[t],
+                              method, lev->absolute);
           }
         }
       }
