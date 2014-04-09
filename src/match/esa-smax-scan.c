@@ -27,12 +27,12 @@ typedef struct {
   const GtEncseq *encseq;
   GtArrayGtUlong *suftab_arr;
   GtBittab *marktab;
-} GtESASmaxVerifyInput;
+} GtESASmaxScanVerifyInput;
 
 
 static bool scan_verify_supmax(void *data)
 {
-  GtESASmaxVerifyInput *input = (GtESASmaxVerifyInput*) data; 
+  GtESASmaxScanVerifyInput *input = (GtESASmaxScanVerifyInput*) data; 
   GtUword i;
   gt_bittab_unset(input->marktab);
 
@@ -92,7 +92,7 @@ int gt_runlinsmax(GtStrArray *inputindex,
     GtArrayGtUlong suftab_arr;
     const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
     bool in_interval = true;
-    GtESASmaxVerifyInput *input = gt_malloc(sizeof(*input));
+    GtESASmaxScanVerifyInput *input = gt_malloc(sizeof(*input));
     input->encseq = encseq;
 
     gt_error_check(err);

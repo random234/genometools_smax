@@ -23,6 +23,12 @@
 #include "core/bittab_api.h"
 #include "esa-smax.h"
 
+typedef struct {
+  GtESASmaxLcpintervalsVisitor *visitor;
+  GtUword lb;
+  GtUword rb;
+} GtESASmaxMapVerifyInput;
+
 struct GtESASmaxLcpintervalsVisitor {
   const GtESAVisitor parent_instance;
   Sequentialsuffixarrayreader *ssar;
@@ -31,6 +37,7 @@ struct GtESASmaxLcpintervalsVisitor {
   bool absolute;
   bool silent;
   GtBittab *marktab;
+  GtESASmaxMapVerifyInput *input;
 };
 
 typedef struct
@@ -55,6 +62,8 @@ static void gt_esa_smax_lcpitvs_visitor_delete_info(GtESAVisitorInfo *vi,
   GtESASmaxLcpintervalsVisitor *lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
   gt_bittab_delete(lev->marktab);
   lev->marktab = NULL;
+  gt_free(lev->input);
+  lev->input = NULL;
   gt_free(vi);
 }
 
@@ -90,15 +99,19 @@ static int gt_esa_smax_lcpitvs_visitor_processbranchingedge(
   return 0;
 }
 
-static bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb,
-                          GtUword rb)
- {
-  GtUword idx;
-  const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(lev->ssar);
-  const GtUword *suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
+static bool map_verify_supmax(void *data)
+/*    GtESASmaxLcpintervalsVisitor *lev, GtUword lb,GtUword rb) */
+{
+  GtESASmaxMapVerifyInput *input = (GtESASmaxMapVerifyInput*) data;
 
-  gt_bittab_unset(lev->marktab);
-  for (idx=lb;idx<=rb;idx++)
+  GtUword idx;
+  const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(
+                                                      input->visitor->ssar);
+  const GtUword *suftab = gt_suftabSequentialsuffixarrayreader(
+                                                      input->visitor->ssar);
+
+  gt_bittab_unset(input->visitor->marktab);
+  for (idx=input->lb;idx<=input->rb;idx++)
    {
     if (suftab[idx] > 0)
     {
@@ -106,11 +119,11 @@ static bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb,
                                               GT_READMODE_FORWARD);
       if (ISNOTSPECIAL(cc))
       {
-        if (gt_bittab_bit_is_set(lev->marktab,cc))
+        if (gt_bittab_bit_is_set(input->visitor->marktab,cc))
         {
           return false;
         }
-        gt_bittab_set_bit(lev->marktab,cc);
+        gt_bittab_set_bit(input->visitor->marktab,cc);
        }
      }
   }
@@ -135,7 +148,10 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
   lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
   if (lcp >= lev->searchlength && ret_info->maxlcpinterval)
   {
-    if (verify_supmax(lev,lb,rb))
+    lev->input->lb = lb;
+    lev->input->rb = rb;
+    if (gt_esa_smax_verify_supmax(map_verify_supmax,lev->input))
+/*    if (verify_supmax(lev,lb,rb)) */
     {
       for (s=lb;s<rb;s++)
       {
@@ -192,5 +208,7 @@ GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
   lev->smaxprogress = smaxprogress;
   lev->silent = silent;
   lev->marktab = gt_bittab_new(gt_alphabet_size(gt_encseq_alphabet(ssar->encseq)));
+  lev->input = gt_malloc(sizeof(GtESASmaxMapVerifyInput));
+  lev->input->visitor = lev;
   return ev;
 }
