@@ -43,5 +43,8 @@ void gt_esa_smax_print(GtESASmaxPrintFunc print_func,
 bool gt_esa_smax_verify_supmax(GtESASmaxVerifySupmaxFunc verifysupmax_func,
                               void *data);
 
+void print_repeat_both(void *, const GtEncseq *,GtUword, GtUword, GtUword,
+                      char, bool);
+
 
 #endif

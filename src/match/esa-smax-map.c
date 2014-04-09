@@ -117,39 +117,6 @@ static bool verify_supmax(GtESASmaxLcpintervalsVisitor *lev, GtUword lb,
   return true;
 }
 
-void print_repeat_map(GT_UNUSED void *data, const GtEncseq *encseq, GtUword maxlen,
-                              GtUword suftab_s, GtUword suftab_t,
-                              char method, bool absolute)
-{
-  GtUword score = maxlen * 2;
-  GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
-  GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
-  if (suftab_s > suftab_t)
-  {
-    GtUword tmp;
-    tmp = suftab_s;
-    suftab_s = suftab_t;
-    suftab_t = tmp;
-    tmp = seqnum_s;
-    seqnum_s = seqnum_t;
-    seqnum_t = tmp;
-  }
-
-  if (absolute)
-  {
-    printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
-        suftab_s, method, maxlen, suftab_t,score);
-  } else
-  {
-    GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t),
-            pos_corr_s = gt_encseq_seqstartpos(encseq, seqnum_s);
-
-    printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " "
-        GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method,
-        maxlen, seqnum_t, suftab_t-pos_corr_t,score);
-  }
-}
-
 static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
     GtUword lcp,
     GtUword lb,
@@ -184,7 +151,7 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
             {
               suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
             }
-            gt_esa_smax_print(print_repeat_map, NULL, encseq,
+            gt_esa_smax_print(print_repeat_both, NULL, encseq,
                               lcp, suftab[s], suftab[t],
                               method, lev->absolute);
           }
