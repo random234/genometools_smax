@@ -112,7 +112,7 @@ static bool map_verify_supmax(void *data)
 
   gt_bittab_unset(input->visitor->marktab);
   for (idx=input->lb;idx<=input->rb;idx++)
-   {
+  {
     if (suftab[idx] > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(encseq,suftab[idx]-1,
@@ -124,8 +124,8 @@ static bool map_verify_supmax(void *data)
           return false;
         }
         gt_bittab_set_bit(input->visitor->marktab,cc);
-       }
-     }
+      }
+    }
   }
   return true;
 }
@@ -167,7 +167,7 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
             {
               suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
             }
-            gt_esa_smax_print(print_repeat_both, NULL, encseq,
+            print_repeat_both(NULL, encseq,
                               lcp, suftab[s], suftab[t],
                               method, lev->absolute);
           }

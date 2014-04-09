@@ -16,8 +16,7 @@ Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -suf -sds no" +
     " -lcp -des no -md5 no"
   run_test "#{$bin}gt smax -ii at1MB -absolute -l 50 -map"
-  run_test "grep -v '# argv' #{last_stdout}"
-  run_test "grep -v '# TIME' #{last_stdout}"
+  run_test "grep -v '^#' #{last_stdout}"
   run_test "diff #{last_stdout} #{$testdata}at1MB_smax_absolute_l50.out"
 end
 
@@ -27,8 +26,7 @@ Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -suf -sds no" +
     " -lcp -des no -md5 no"
   run_test "#{$bin}gt smax -ii at1MB -l 50 -map"
-  run_test "grep -v '# argv' #{last_stdout}"
-  run_test "grep -v '# TIME' #{last_stdout}"
+  run_test "grep -v '^#' #{last_stdout}"
   run_test "diff #{last_stdout} #{$testdata}at1MB_smax_relative_l50.out"
 end
 
@@ -38,8 +36,7 @@ Keywords "gt_smax"
   run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -suf -sds no" +
     " -lcp -des no -md5 no"
   run_test "#{$bin}gt smax -ii at1MB -absolute -l 50"
-  run_test "grep -v '# argv' #{last_stdout}"
-  run_test "grep -v '# TIME' #{last_stdout}"
+  run_test "grep -v '^#' #{last_stdout}"
   run_test "diff #{last_stdout} #{$testdata}at1MB_smax_absolute_l50.out"
 end
 
@@ -49,7 +46,6 @@ Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -suf -sds no" +
     " -lcp -des no -md5 no"
   run_test "#{$bin}gt smax -ii at1MB -l 50"
-  run_test "grep -v '# argv' #{last_stdout}"
-  run_test "grep -v '# TIME' #{last_stdout}"
+  run_test "grep -v '^#' #{last_stdout}"
   run_test "diff #{last_stdout} #{$testdata}at1MB_smax_relative_l50.out"
 end

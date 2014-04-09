@@ -19,21 +19,6 @@
 #include "esa-smax.h"
 #include "core/encseq_api.h"
 
-void gt_esa_smax_print(GtESASmaxPrintFunc print_func,
-                       void *data,
-                       const struct GtEncseq *encseq,
-                       GtUword maxlen,
-                       GtUword suftab_s,
-                       GtUword suftab_t,
-                       char method,
-                       bool absolute)
-{
-  if (print_func != NULL)
-  {
-    print_func(data,encseq,maxlen,suftab_s,suftab_t,method,absolute);
-  }
-}
-
 bool gt_esa_smax_verify_supmax(GtESASmaxVerifySupmaxFunc verifysupmax_func,
                               void *data)
 {

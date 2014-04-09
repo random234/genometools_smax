@@ -31,15 +31,6 @@ typedef void (*GtESASmaxPrintFunc)(void *data,
 
 typedef bool (*GtESASmaxVerifySupmaxFunc)(void *data);
 
-void gt_esa_smax_print(GtESASmaxPrintFunc print_func,
-                        void *data,
-                        const struct GtEncseq *encseq,
-                        GtUword maxlen,
-                        GtUword suftab_s,
-                        GtUword suftab_t,
-                        char method,
-                        bool absolute);
-
 bool gt_esa_smax_verify_supmax(GtESASmaxVerifySupmaxFunc verifysupmax_func,
                               void *data);
 

@@ -141,7 +141,7 @@ int gt_runlinsmax(GtStrArray *inputindex,
               {
                 if (!silent)
                 {
-                  gt_esa_smax_print(print_repeat_both, NULL, encseq,
+                  print_repeat_both (NULL, encseq,
                                     currentlcpmax, 
                                     suftab_arr.spaceGtUlong[s],
                                     suftab_arr.spaceGtUlong[t],
