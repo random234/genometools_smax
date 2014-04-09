@@ -60,7 +60,8 @@ int gt_runlinsmax(GtStrArray *inputindex,
     GtUword searchlength,
     bool absolute,
     bool silent,
-    GT_UNUSED bool outedges,
+    GT_UNUSED GtProcessSmaxpairs *process_smaxpairs,
+    GT_UNUSED void *process_smaxpairsdata,
     GtLogger *logger,
     GtError *err)
 {

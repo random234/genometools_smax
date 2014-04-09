@@ -128,31 +128,41 @@ static int gt_smax_runner(int argc, const char **argv, int parsed_args,
   }
   printf("# argv[0]=%s\n", argv[0]);
 
-  /*
-  gt_runesmaxlcpvalues(const char *inputindex,
-                        bool outedges,
-                        bool bottomup,
-                        GtLogger *logger,
-                        GtError *err);
-  */
-  if (arguments->bool_option_map)
+  if (!had_err)
   {
-    if (gt_runsmaxlcpvalues(arguments->index_option_smax,
-        arguments->ulong_option_searchlength,
-        arguments->bool_option_absolute,
-        arguments->bool_option_silent, true, true, logger, err) != 0)
+    GtProcessSmaxpairs *process_smaxpairs = NULL;
+    void *process_smaxpairsdata = NULL;
+
+    if (arguments->bool_option_map)
     {
-      had_err = true;
-    }
-  } else 
-  {
-    if (gt_runlinsmax(arguments->index_option_smax,
-        arguments->ulong_option_searchlength,arguments->bool_option_absolute,
-        arguments->bool_option_silent, true, logger, err) != 0)
+      if (gt_runsmaxlcpvalues(arguments->index_option_smax,
+                              arguments->ulong_option_searchlength,
+                              arguments->bool_option_absolute,
+                              arguments->bool_option_silent, 
+                              true, 
+                              process_smaxpairs,
+                              process_smaxpairsdata,
+                              logger,
+                              err) != 0)
+      {
+        had_err = true;
+      }
+    } else 
     {
-      had_err = true;
+      if (gt_runlinsmax(arguments->index_option_smax,
+                        arguments->ulong_option_searchlength,
+                        arguments->bool_option_absolute,
+                        arguments->bool_option_silent,
+                        process_smaxpairs,
+                        process_smaxpairsdata,
+                        logger,
+                        err) != 0)
+      {
+        had_err = true;
+      }
     }
   }
+  
   gt_logger_delete(logger);
   return had_err;
 }

@@ -18,10 +18,10 @@
 #include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
 #include "esa_visitor_rep.h"
-#include "esa-smax-map.h"
 #include "esa-seqread.h"
 #include "core/bittab_api.h"
 #include "esa-smax.h"
+#include "esa-smax-map.h"
 
 typedef struct {
   GtESASmaxLcpintervalsVisitor *visitor;
@@ -196,8 +196,13 @@ const GtESAVisitorClass* gt_esa_smax_lcpitvs_visitor_class()
 }
 
 GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
-    Sequentialsuffixarrayreader *ssar, GtUword searchlength, bool absolute,
-    bool silent, GtTimer *smaxprogress)
+                                      Sequentialsuffixarrayreader *ssar,
+                                      GtUword searchlength,
+                                      bool absolute,
+                                      bool silent,
+                                      GT_UNUSED GtProcessSmaxpairs *process_smaxpairs,
+                                      GT_UNUSED void *process_smaxpairsdata,
+                                      GtTimer *smaxprogress)
 { 
   GtESASmaxLcpintervalsVisitor *lev;
   GtESAVisitor *ev = gt_esa_visitor_create(gt_esa_smax_lcpitvs_visitor_class());

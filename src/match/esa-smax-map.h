@@ -21,12 +21,18 @@
 #include "match/esa_visitor.h"
 #include "core/str_api.h"
 #include "esa-seqread.h"
+#include "match/esa-smax.h"
 
 typedef struct GtESASmaxLcpintervalsVisitor GtESASmaxLcpintervalsVisitor;
 
 const GtESAVisitorClass* gt_esa_smax_lcpitvs_visitor_class(void);
 GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(Sequentialsuffixarrayreader *,
-    GtUword, bool, bool, GtTimer *);
+                                              GtUword,
+                                              bool,
+                                              bool,
+                                              GtProcessSmaxpairs *,
+                                              void *,
+                                              GtTimer *);
 bool gt_esa_smax_lcpitvs_visitor_get_info(GtESAVisitorInfo *);
 void gt_esa_smax_lcpitvs_visitor_set_info(GtESAVisitorInfo *, bool);
 

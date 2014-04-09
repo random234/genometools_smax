@@ -23,13 +23,15 @@
 #include "core/str_api.h"
 #include "esa-dfs.h"
 #include "core/showtime.h"
+#include "esa-smax.h"
 
 int gt_runsmaxlcpvalues(GtStrArray *inputindex,
     GtUword searchlength,
     bool absolute,
     bool silent,
-    GT_UNUSED bool outedges,
     bool bottomup,
+    GtProcessSmaxpairs *process_smaxpairs,
+    void *process_smaxpairsdata,
     GtLogger *logger,
     GtError *err)
 {
@@ -63,7 +65,13 @@ int gt_runsmaxlcpvalues(GtStrArray *inputindex,
     if (bottomup)
     {
       GtESAVisitor *elv = gt_esa_smax_lcpitvs_visitor_new(
-          ssar, searchlength, absolute, silent, smaxprogress);
+                                                      ssar,
+                                                      searchlength,
+                                                      absolute,
+                                                      silent,
+                                                      process_smaxpairs,
+                                                      process_smaxpairsdata,
+                                                      smaxprogress);
       if (gt_esa_bottomup(ssar, elv, err) != 0)
       {
         haserr = true;

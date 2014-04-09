@@ -20,11 +20,15 @@
 
 #include "core/logger_api.h"
 #include "core/error_api.h"
+#include "match/esa-smax.h"
 
-int gt_runsmaxlcpvalues(GtStrArray *,GtUword, bool, bool, bool, bool,
-    GtLogger *, GtError *);
-
-int gt_smax_runscanesa(const char *inputindex, unsigned int mode,
-                  GtLogger *logger,GtError *err);
-
+int gt_runsmaxlcpvalues(GtStrArray *,
+                        GtUword,
+                        bool,
+                        bool,
+                        bool,
+                        GtProcessSmaxpairs *,
+                        void *,
+                        GtLogger *,
+                        GtError *);
 #endif
