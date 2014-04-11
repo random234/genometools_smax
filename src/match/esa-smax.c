@@ -29,8 +29,8 @@ bool gt_esa_smax_verify_supmax(GtESASmaxVerifySupmaxFunc verifysupmax_func,
   /* throw error */
   return false;
 }
-
-void print_repeat_both(GT_UNUSED void *data, const GtEncseq *encseq,
+/*
+void print_repeat(GT_UNUSED void *data, const GtEncseq *encseq,
                         GtUword maxlen, GtUword suftab_s, GtUword suftab_t,
                         char method, bool absolute)
 {
@@ -62,3 +62,4 @@ void print_repeat_both(GT_UNUSED void *data, const GtEncseq *encseq,
            maxlen, seqnum_t, suftab_t-pos_corr_t,score);
   }
 }
+*/

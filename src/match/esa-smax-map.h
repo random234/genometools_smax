@@ -30,7 +30,7 @@ GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(Sequentialsuffixarrayreader *,
                                               GtUword,
                                               bool,
                                               bool,
-                                              GtProcessSmaxpairs *,
+                                              GtProcessSmaxpairs,
                                               void *,
                                               GtTimer *);
 bool gt_esa_smax_lcpitvs_visitor_get_info(GtESAVisitorInfo *);

@@ -21,21 +21,24 @@
 #include "core/encseq_api.h"
 #include "core/types_api.h"
 
-typedef void (*GtProcessSmaxpairs)(void *data,
-                                  const struct GtEncseq *encseq,
-                                  GtUword maxlen,
-                                  GtUword suftab_s,
-                                  GtUword suftab_t,
-                                  char method,
-                                  bool absolute);
+typedef void (*GtProcessSmaxpairs)(void *,
+                                  const struct GtEncseq *,
+                                  GtUword,
+                                  GtUword,
+                                  GtUword,
+                                  char,
+                                  bool);
 
 typedef bool (*GtESASmaxVerifySupmaxFunc)(void *data);
 
 bool gt_esa_smax_verify_supmax(GtESASmaxVerifySupmaxFunc verifysupmax_func,
                               void *data);
 
-void print_repeat_both(void *, const GtEncseq *, GtUword, GtUword, GtUword,
-                      char, bool);
-
-
+void print_repeat(void *,
+                  const GtEncseq *,
+                  GtUword,
+                  GtUword,
+                  GtUword,
+                  char,
+                  bool);
 #endif

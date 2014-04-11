@@ -27,7 +27,7 @@ int gt_runsmaxlcpvalues(GtStrArray *,
                         bool,
                         bool,
                         bool,
-                        GtProcessSmaxpairs *,
+                        GtProcessSmaxpairs,
                         void *,
                         GtLogger *,
                         GtError *);

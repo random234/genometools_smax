@@ -60,8 +60,8 @@ int gt_runlinsmax(GtStrArray *inputindex,
     GtUword searchlength,
     bool absolute,
     bool silent,
-    GT_UNUSED GtProcessSmaxpairs *process_smaxpairs,
-    GT_UNUSED void *process_smaxpairsdata,
+    GtProcessSmaxpairs process_smaxpairs,
+    void *process_smaxpairsdata,
     GtLogger *logger,
     GtError *err)
 {
@@ -142,11 +142,13 @@ int gt_runlinsmax(GtStrArray *inputindex,
               {
                 if (!silent)
                 {
-                  print_repeat_both (NULL, encseq,
-                                    currentlcpmax, 
-                                    suftab_arr.spaceGtUlong[s],
-                                    suftab_arr.spaceGtUlong[t],
-                                    method, absolute);
+                  process_smaxpairs (process_smaxpairsdata,
+                                      encseq,
+                                      currentlcpmax, 
+                                      suftab_arr.spaceGtUlong[s],
+                                      suftab_arr.spaceGtUlong[t],
+                                      method,
+                                      absolute);
                 }
               }
             }

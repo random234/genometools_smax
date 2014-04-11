@@ -25,7 +25,7 @@ inline int gt_runlinsmax(GtStrArray *,
                         GtUword,
                         bool,
                         bool,
-                        GtProcessSmaxpairs *,
+                        GtProcessSmaxpairs,
                         void *,
                         GtLogger *,
                         GtError *);

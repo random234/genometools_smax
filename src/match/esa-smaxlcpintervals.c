@@ -30,7 +30,7 @@ int gt_runsmaxlcpvalues(GtStrArray *inputindex,
     bool absolute,
     bool silent,
     bool bottomup,
-    GtProcessSmaxpairs *process_smaxpairs,
+    GtProcessSmaxpairs process_smaxpairs,
     void *process_smaxpairsdata,
     GtLogger *logger,
     GtError *err)
