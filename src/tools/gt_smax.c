@@ -33,10 +33,13 @@ typedef struct {
   bool bool_option_map;
 } SmaxArguments;
 
-
-void print_repeat(GT_UNUSED void *info, const GtEncseq *encseq,
-                        GtUword maxlen, GtUword suftab_s, GtUword suftab_t,
-                        char method, bool absolute)
+void print_repeat(GT_UNUSED void *info,
+                  const GtEncseq *encseq,
+                  GtUword maxlen,
+                  GtUword suftab_s,
+                  GtUword suftab_t,
+                  char method,
+                  bool absolute)
 {
   GtUword score = maxlen * 2;
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
@@ -143,8 +146,11 @@ static int gt_smax_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static int gt_smax_runner(int argc, const char **argv, int parsed_args,
-                              void *tool_arguments, GtError *err)
+static int gt_smax_runner(int argc,
+                          const char **argv,
+                          int parsed_args,
+                          void *tool_arguments,
+                          GtError *err)
 {
   SmaxArguments *arguments = tool_arguments;
   GT_UNUSED GtLogger *logger;

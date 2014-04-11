@@ -209,7 +209,7 @@ GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
                                       GtProcessSmaxpairs process_smaxpairs,
                                       void *process_smaxpairsdata,
                                       GtTimer *smaxprogress)
-{ 
+{
   GtESASmaxLcpintervalsVisitor *lev;
   GtESAVisitor *ev = gt_esa_visitor_create(gt_esa_smax_lcpitvs_visitor_class());
   lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
@@ -218,7 +218,9 @@ GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
   lev->absolute = absolute;
   lev->smaxprogress = smaxprogress;
   lev->silent = silent;
-  lev->marktab = gt_bittab_new(gt_alphabet_size(gt_encseq_alphabet(ssar->encseq)));
+  lev->marktab = gt_bittab_new(gt_alphabet_size(
+                                gt_encseq_alphabet(
+                                ssar->encseq)));
   lev->process_smaxpairs = process_smaxpairs;
   lev->process_smaxpairsdata = process_smaxpairsdata;
   lev->input = gt_malloc(sizeof(GtESASmaxMapVerifyInput));

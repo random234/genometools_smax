@@ -29,10 +29,9 @@ typedef struct {
   GtBittab *marktab;
 } GtESASmaxScanVerifyInput;
 
-
 static bool scan_verify_supmax(void *data)
 {
-  GtESASmaxScanVerifyInput *input = (GtESASmaxScanVerifyInput*) data; 
+  GtESASmaxScanVerifyInput *input = (GtESASmaxScanVerifyInput*) data;
   GtUword i;
   gt_bittab_unset(input->marktab);
 
@@ -79,7 +78,7 @@ int gt_runlinsmax(GtStrArray *inputindex,
   if (ssar == NULL)
   {
     haserr = true;
-  }  
+  }
   if (!haserr)
   {
     GtTimer *linsmaxprogress = NULL;
@@ -144,7 +143,7 @@ int gt_runlinsmax(GtStrArray *inputindex,
                 {
                   process_smaxpairs (process_smaxpairsdata,
                                       encseq,
-                                      currentlcpmax, 
+                                      currentlcpmax,
                                       suftab_arr.spaceGtUlong[s],
                                       suftab_arr.spaceGtUlong[t],
                                       method,
