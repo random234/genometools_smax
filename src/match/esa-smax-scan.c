@@ -19,41 +19,9 @@
 #include "core/showtime.h"
 #include "core/bittab_api.h"
 #include "core/arraydef.h"
-#include "esa-seqread.h"
-#include "esa-smax.h"
+#include "match/esa-seqread.h"
+#include "match/esa-smax.h"
 #include "match/esa-smax-scan.h"
-
-typedef struct {
-  const GtEncseq *encseq;
-  GtArrayGtUlong *suftab_arr;
-  GtBittab *marktab;
-} GtESASmaxScanVerifyInput;
-
-static bool scan_verify_supmax(void *data)
-{
-  GtESASmaxScanVerifyInput *input = (GtESASmaxScanVerifyInput*) data;
-  GtUword i;
-  gt_bittab_unset(input->marktab);
-
-  for (i = 0;i<input->suftab_arr->nextfreeGtUlong;i++)
-  {
-    GtUword suf = input->suftab_arr->spaceGtUlong[i];
-    if (suf > 0)
-    {
-      GtUchar cc = gt_encseq_get_encoded_char(input->encseq,suf-1,
-                                             GT_READMODE_FORWARD);
-      if (ISNOTSPECIAL(cc))
-      {
-        if (gt_bittab_bit_is_set(input->marktab,cc))
-        {
-          return false;
-        }
-        gt_bittab_set_bit(input->marktab,cc);
-      }
-    }
-  }
-  return true;
-}
 
 int gt_runlinsmax(GtStrArray *inputindex,
     GtUword searchlength,
@@ -92,8 +60,6 @@ int gt_runlinsmax(GtStrArray *inputindex,
     GtArrayGtUlong suftab_arr;
     const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
     bool in_interval = true;
-    GtESASmaxScanVerifyInput *input = gt_malloc(sizeof(*input));
-    input->encseq = encseq;
 
     gt_error_check(err);
     marktab = gt_bittab_new(gt_alphabet_size(gt_encseq_alphabet(encseq)));
@@ -128,10 +94,7 @@ int gt_runlinsmax(GtStrArray *inputindex,
         if (in_interval && currentlcpmax >= searchlength)
         {
           GT_STOREINARRAY(&suftab_arr,GtUlong,32,previoussuffix);
-          input->suftab_arr = &suftab_arr;
-          input->marktab = marktab;
-          if (gt_esa_smax_verify_supmax(scan_verify_supmax,input))
-          /*if (gt_smaxscan_verify_supmax(encseq, &suftab_arr, marktab))*/
+          if (gt_esa_smax_verify_supmax(encseq, &suftab_arr, marktab))
           {
             GtUword s;
             for (s = 0;s<suftab_arr.nextfreeGtUlong;s++)
@@ -166,7 +129,6 @@ int gt_runlinsmax(GtStrArray *inputindex,
     }
     GT_FREEARRAY(&suftab_arr,GtUlong);
     gt_bittab_delete(marktab);
-    gt_free(input);
   }
   if (ssar != NULL)
   {

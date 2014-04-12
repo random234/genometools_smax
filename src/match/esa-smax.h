@@ -20,6 +20,8 @@
 
 #include "core/encseq_api.h"
 #include "core/types_api.h"
+#include "core/arraydef.h"
+#include "core/bittab_api.h"
 
 typedef void (*GtProcessSmaxpairs)(void *,
                                   const struct GtEncseq *,
@@ -29,10 +31,9 @@ typedef void (*GtProcessSmaxpairs)(void *,
                                   char,
                                   bool);
 
-typedef bool (*GtESASmaxVerifySupmaxFunc)(void *data);
-
-bool gt_esa_smax_verify_supmax(GtESASmaxVerifySupmaxFunc verifysupmax_func,
-                              void *data);
+bool gt_esa_smax_verify_supmax(const GtEncseq *,
+                              GtArrayGtUlong *,
+                              GtBittab *);
 
 void print_repeat(void *,
                   const GtEncseq *,

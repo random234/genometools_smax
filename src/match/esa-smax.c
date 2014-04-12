@@ -16,16 +16,35 @@
 */
 
 #include "core/unused_api.h"
-#include "esa-smax.h"
 #include "core/encseq_api.h"
+#include "core/arraydef.h"
+#include "core/bittab_api.h"
+#include "match/esa-seqread.h"
+#include "match/esa-smax.h"
 
-bool gt_esa_smax_verify_supmax(GtESASmaxVerifySupmaxFunc verifysupmax_func,
-                              void *data)
+bool gt_esa_smax_verify_supmax(const GtEncseq *encseq,
+                              GtArrayGtUlong *suftab_arr,
+                              GtBittab *marktab)
 {
-  if (verifysupmax_func != NULL)
+  GtUword idx;
+  gt_bittab_unset(marktab);
+
+  for (idx = 0;idx<suftab_arr->nextfreeGtUlong;idx++)
   {
-    return verifysupmax_func(data);
+    GtUword suf = suftab_arr->spaceGtUlong[idx];
+    if (suf > 0)
+    {
+      GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,
+                                              GT_READMODE_FORWARD);
+      if (ISNOTSPECIAL(cc))
+      {
+        if (gt_bittab_bit_is_set(marktab,cc))
+        {
+          return false;
+        }
+        gt_bittab_set_bit(marktab,cc);
+      }
+    }
   }
-  /* throw error */
-  return false;
+  return true;
 }

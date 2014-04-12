@@ -18,9 +18,9 @@
 #ifndef ESA_SMAX_MAP_H
 #define ESA_SMAX_MAP_H
 
-#include "match/esa_visitor.h"
 #include "core/str_api.h"
-#include "esa-seqread.h"
+#include "match/esa_visitor.h"
+#include "match/esa-seqread.h"
 #include "match/esa-smax.h"
 
 typedef struct GtESASmaxLcpintervalsVisitor GtESASmaxLcpintervalsVisitor;

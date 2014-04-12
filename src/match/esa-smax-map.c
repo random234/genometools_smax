@@ -17,17 +17,12 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
-#include "esa_visitor_rep.h"
-#include "esa-seqread.h"
 #include "core/bittab_api.h"
-#include "esa-smax.h"
-#include "esa-smax-map.h"
-
-typedef struct {
-  GtESASmaxLcpintervalsVisitor *visitor;
-  GtUword lb;
-  GtUword rb;
-} GtESASmaxMapVerifyInput;
+#include "core/arraydef.h"
+#include "match/esa_visitor_rep.h"
+#include "match/esa-seqread.h"
+#include "match/esa-smax.h"
+#include "match/esa-smax-map.h"
 
 struct GtESASmaxLcpintervalsVisitor {
   const GtESAVisitor parent_instance;
@@ -37,9 +32,11 @@ struct GtESASmaxLcpintervalsVisitor {
   bool absolute;
   bool silent;
   GtBittab *marktab;
+  const GtEncseq *encseq;
+  const GtUword *suftab;
+  GtArrayGtUlong suftab_arr;
   GtProcessSmaxpairs process_smaxpairs;
   void *process_smaxpairsdata;
-  GtESASmaxMapVerifyInput *input;
 };
 
 typedef struct
@@ -64,8 +61,7 @@ static void gt_esa_smax_lcpitvs_visitor_delete_info(GtESAVisitorInfo *vi,
   GtESASmaxLcpintervalsVisitor *lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
   gt_bittab_delete(lev->marktab);
   lev->marktab = NULL;
-  gt_free(lev->input);
-  lev->input = NULL;
+  GT_FREEARRAY(&(lev->suftab_arr),GtUlong);
   gt_free(vi);
 }
 
@@ -101,37 +97,6 @@ static int gt_esa_smax_lcpitvs_visitor_processbranchingedge(
   return 0;
 }
 
-static bool map_verify_supmax(void *data)
-/*    GtESASmaxLcpintervalsVisitor *lev, GtUword lb,GtUword rb) */
-{
-  GtESASmaxMapVerifyInput *input = (GtESASmaxMapVerifyInput*) data;
-
-  GtUword idx;
-  const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(
-                                                      input->visitor->ssar);
-  const GtUword *suftab = gt_suftabSequentialsuffixarrayreader(
-                                                      input->visitor->ssar);
-
-  gt_bittab_unset(input->visitor->marktab);
-  for (idx=input->lb;idx<=input->rb;idx++)
-  {
-    if (suftab[idx] > 0)
-    {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,suftab[idx]-1,
-                                              GT_READMODE_FORWARD);
-      if (ISNOTSPECIAL(cc))
-      {
-        if (gt_bittab_bit_is_set(input->visitor->marktab,cc))
-        {
-          return false;
-        }
-        gt_bittab_set_bit(input->visitor->marktab,cc);
-      }
-    }
-  }
-  return true;
-}
-
 static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
     GtUword lcp,
     GtUword lb,
@@ -140,20 +105,20 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
     GtError *err)
 {
   GtESASmaxLcpintervalsVisitor *lev;
-  GtUword s,t;
+  GtUword s,t,idx;
   char method = 'D';
   GtLcpmaxintervalinfo *ret_info = (GtLcpmaxintervalinfo *) info;
-  const GtEncseq *encseq = NULL;
-  const GtUword *suftab = NULL;
-
   gt_assert(ev && err);
   lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
+
   if (lcp >= lev->searchlength && ret_info->maxlcpinterval)
   {
-    lev->input->lb = lb;
-    lev->input->rb = rb;
-    if (gt_esa_smax_verify_supmax(map_verify_supmax,lev->input))
-/*    if (verify_supmax(lev,lb,rb)) */
+    lev->suftab_arr.nextfreeGtUlong = 0;
+    for (idx=lb;idx<=rb;idx++)
+    {
+      GT_STOREINARRAY(&(lev->suftab_arr),GtUlong,32,lev->suftab[idx]);
+    }
+    if (gt_esa_smax_verify_supmax(lev->encseq,&(lev->suftab_arr),lev->marktab))
     {
       for (s=lb;s<rb;s++)
       {
@@ -161,19 +126,11 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
         {
           if (!lev->silent)
           {
-            if (encseq == NULL)
-            {
-              encseq = gt_encseqSequentialsuffixarrayreader(lev->ssar);
-            }
-            if (suftab == NULL)
-            {
-              suftab = gt_suftabSequentialsuffixarrayreader(lev->ssar);
-            }
             lev->process_smaxpairs(lev->process_smaxpairsdata,
-                              encseq,
+                              lev->encseq,
                               lcp,
-                              suftab[s],
-                              suftab[t],
+                              lev->suftab[s],
+                              lev->suftab[t],
                               method,
                               lev->absolute);
           }
@@ -221,9 +178,10 @@ GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
   lev->marktab = gt_bittab_new(gt_alphabet_size(
                                 gt_encseq_alphabet(
                                 ssar->encseq)));
+  GT_INITARRAY(&(lev->suftab_arr),GtUlong);
+  lev->encseq = gt_encseqSequentialsuffixarrayreader(ssar);
+  lev->suftab = gt_suftabSequentialsuffixarrayreader(ssar);
   lev->process_smaxpairs = process_smaxpairs;
   lev->process_smaxpairsdata = process_smaxpairsdata;
-  lev->input = gt_malloc(sizeof(GtESASmaxMapVerifyInput));
-  lev->input->visitor = lev;
   return ev;
 }
