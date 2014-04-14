@@ -22,13 +22,12 @@
 #include "core/error_api.h"
 #include "match/esa-smax.h"
 
-int gt_runsmaxlcpvalues(GtStrArray *,
+int gt_runsmaxlcpvalues(Sequentialsuffixarrayreader *,
                         GtUword,
                         bool,
                         bool,
                         bool,
                         GtProcessSmaxpairs,
                         void *,
-                        GtLogger *,
                         GtError *);
 #endif

@@ -25,29 +25,27 @@
 #include "match/esa-smax.h"
 #include "esa-smax-map.h"
 
-int gt_runsmaxlcpvalues(GtStrArray *inputindex,
+int gt_runsmaxlcpvalues(Sequentialsuffixarrayreader *ssar,
     GtUword searchlength,
     bool absolute,
     bool silent,
     bool bottomup,
     GtProcessSmaxpairs process_smaxpairs,
     void *process_smaxpairsdata,
-    GtLogger *logger,
     GtError *err)
 {
   bool haserr = false;
-  Sequentialsuffixarrayreader *ssar;
   GtTimer *smaxprogress = NULL;
-  gt_error_check(err);
+/*  Sequentialsuffixarrayreader *ssar;
   ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
         inputindex,0),
       SARR_LCPTAB |
       SARR_SUFTAB |
       SARR_ESQTAB,
-      false, /* map suftab and lcptab */
+      false,  map suftab and lcptab 
       logger,
       err);
-
+*/
   gt_showtime_enable();
   if (gt_showtime_enabled())
   {

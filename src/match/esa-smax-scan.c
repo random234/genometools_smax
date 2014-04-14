@@ -23,26 +23,25 @@
 #include "match/esa-smax.h"
 #include "match/esa-smax-scan.h"
 
-int gt_runlinsmax(GtStrArray *inputindex,
+int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
     GtUword searchlength,
     bool absolute,
     bool silent,
     GtProcessSmaxpairs process_smaxpairs,
     void *process_smaxpairsdata,
-    GtLogger *logger,
     GtError *err)
 {
   bool haserr = false;
-  Sequentialsuffixarrayreader *ssar =
+/*  Sequentialsuffixarrayreader *ssar =
     gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
-        inputindex,0),
-        SARR_LCPTAB |
-        SARR_SUFTAB |
-        SARR_ESQTAB,
-        true, /* scan suftab and lcptab */
-        logger,
-        err);
-
+                                          inputindex,0),
+                                          SARR_LCPTAB |
+                                          SARR_SUFTAB |
+                                          SARR_ESQTAB,
+                                          true,  scan suftab and lcptab 
+                                          logger,
+                                          err);
+*/
   if (ssar == NULL)
   {
     haserr = true;

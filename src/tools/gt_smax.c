@@ -18,11 +18,12 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "tools/gt_smax.h"
+#include "core/logger.h"
+#include "core/error.h"
+#include "match/esa-seqread.h"
 #include "match/esa-smax.h"
 #include "match/esa-smaxlcpintervals.h"
 #include "match/esa-smax-scan.h"
-#include "core/error.h"
-#include "core/logger.h"
 
 typedef struct {
   bool bool_option_smax;
@@ -53,9 +54,9 @@ void print_repeat(GT_UNUSED void *info,
     tmp = seqnum_s;
     seqnum_s = seqnum_t;
     seqnum_t = tmp;
-  }
+   }
   if (absolute)
-  {
+  { 
     printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
           suftab_s, method, maxlen, suftab_t,score);
   } else
@@ -69,6 +70,52 @@ void print_repeat(GT_UNUSED void *info,
            maxlen, seqnum_t, suftab_t-pos_corr_t,score);
   }
 }
+
+void print_repeat_mirrored(GT_UNUSED void *info,
+                  const GtEncseq *encseq,
+                  GtUword maxlen,
+                  GtUword suftab_s,
+                  GtUword suftab_t,
+                  char method,
+                  bool absolute)
+{
+  GtUword score = maxlen * 2;
+  GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
+  GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
+  if (suftab_s > suftab_t)
+  {
+    GtUword tmp;
+    tmp = suftab_s;
+    suftab_s = suftab_t;
+    suftab_t = tmp;
+    tmp = seqnum_s;
+    seqnum_s = seqnum_t;
+    seqnum_t = tmp;
+   }
+  if (absolute)
+  { 
+    printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
+          suftab_s, method, maxlen, suftab_t,score);
+  } else
+  {
+    GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t),
+                                              pos_corr_s = 
+                                              gt_encseq_seqstartpos(
+                                              encseq, seqnum_s);
+    printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " "
+           GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method,
+           maxlen, seqnum_t, suftab_t-pos_corr_t,score);
+    GtUword idx;
+    for (idx=0;idx<maxlen;idx++)
+    {
+      printf("%c",gt_encseq_get_decoded_char(encseq,
+                                                        suftab_s+idx,
+                                                        GT_READMODE_REVERSE));
+    }
+    printf("\n");
+  }
+}
+
 
 static void* gt_smax_arguments_new(void)
 {
@@ -173,20 +220,32 @@ static int gt_smax_runner(int argc,
   {
     GtProcessSmaxpairs process_smaxpairs;
     void *process_smaxpairsdata;
+    
+    Sequentialsuffixarrayreader *ssar = 
+      gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
+                                          arguments->index_option_smax,0),
+                                          SARR_LCPTAB |
+                                          SARR_SUFTAB |
+                                          SARR_ESQTAB,
+                                          /* scan suftab and lcptab */
+                                          /* scan = true */
+                                          /* map = false */
+                                          !arguments->bool_option_map, 
+                                          logger,
+                                          err);
 
     if (arguments->bool_option_map)
     {
       process_smaxpairs = print_repeat;
       process_smaxpairsdata = NULL;
 
-      if (gt_runsmaxlcpvalues(arguments->index_option_smax,
+      if (gt_runsmaxlcpvalues(ssar,
                               arguments->ulong_option_searchlength,
                               arguments->bool_option_absolute,
                               arguments->bool_option_silent, 
                               true, 
                               process_smaxpairs,
                               process_smaxpairsdata,
-                              logger,
                               err) != 0)
       {
         had_err = true;
@@ -196,13 +255,12 @@ static int gt_smax_runner(int argc,
       process_smaxpairs = print_repeat;
       process_smaxpairsdata = NULL;
 
-      if (gt_runlinsmax(arguments->index_option_smax,
+      if (gt_runlinsmax(ssar,
                         arguments->ulong_option_searchlength,
                         arguments->bool_option_absolute,
                         arguments->bool_option_silent,
                         process_smaxpairs,
                         process_smaxpairsdata,
-                        logger,
                         err) != 0)
       {
         had_err = true;

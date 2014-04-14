@@ -21,13 +21,12 @@
 #include "core/logger_api.h"
 #include "core/error_api.h"
 
-inline int gt_runlinsmax(GtStrArray *,
+inline int gt_runlinsmax(Sequentialsuffixarrayreader *,
                         GtUword,
                         bool,
                         bool,
                         GtProcessSmaxpairs,
                         void *,
-                        GtLogger *,
                         GtError *);
 
 #endif
