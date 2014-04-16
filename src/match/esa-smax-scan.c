@@ -32,16 +32,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
     GtError *err)
 {
   bool haserr = false;
-/*  Sequentialsuffixarrayreader *ssar =
-    gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
-                                          inputindex,0),
-                                          SARR_LCPTAB |
-                                          SARR_SUFTAB |
-                                          SARR_ESQTAB,
-                                          true,  scan suftab and lcptab 
-                                          logger,
-                                          err);
-*/
+  
   if (ssar == NULL)
   {
     haserr = true;
@@ -72,7 +63,14 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
                                               "finding supermaximal repeats");
       gt_timer_start(linsmaxprogress);
     }
-
+    
+/*    printf("" GT_WU "\n",gt_encseq_num_of_sequences(encseq));
+    for (idx = 0; idx <= nonspecials; idx++)
+    {
+        printf("%c",gt_encseq_get_decoded_char(encseq,idx,GT_READMODE_FORWARD));
+    }
+    printf("\n");
+*/
     currentlcpmax = 0;
     for (idx = 0; idx < nonspecials; idx++)
     {

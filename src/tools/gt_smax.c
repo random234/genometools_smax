@@ -32,6 +32,7 @@ typedef struct {
   bool bool_option_absolute;
   bool bool_option_silent;
   bool bool_option_map;
+  bool bool_option_mirror;
 } SmaxArguments;
 
 void print_repeat(GT_UNUSED void *info,
@@ -54,7 +55,7 @@ void print_repeat(GT_UNUSED void *info,
     tmp = seqnum_s;
     seqnum_s = seqnum_t;
     seqnum_t = tmp;
-   }
+  }
   if (absolute)
   { 
     printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
@@ -80,8 +81,10 @@ void print_repeat_mirrored(GT_UNUSED void *info,
                   bool absolute)
 {
   GtUword score = maxlen * 2;
+  GtUword halftotal_seqnum = gt_encseq_num_of_sequences(encseq)/2;
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
   GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
+
   if (suftab_s > suftab_t)
   {
     GtUword tmp;
@@ -91,7 +94,25 @@ void print_repeat_mirrored(GT_UNUSED void *info,
     tmp = seqnum_s;
     seqnum_s = seqnum_t;
     seqnum_t = tmp;
-   }
+  }
+  if (seqnum_t - halftotal_seqnum == seqnum_s)
+  {
+//    printf("seqnum_s: " GT_WU " seqnum_t: " GT_WU "\n", seqnum_s, seqnum_t);
+    GtUword seqlen = gt_encseq_seqlength(encseq, seqnum_s);
+    GtUword seqstart_s = gt_encseq_seqstartpos(encseq,seqnum_s);
+    GtUword seqstart_t = gt_encseq_seqstartpos(encseq,seqnum_t);
+//    printf("seqlen: " GT_WU "\n", seqlen);
+//    printf("suftab_s: " GT_WU "\n", seqstart_s);
+//    printf("suftab_t: " GT_WU "\n", seqstart_t);
+
+//    printf("calc_s: " GT_WU "\n", (seqlen-((suftab_s-seqstart_s)+maxlen)));
+//    printf("calc_t: " GT_WU "\n", suftab_t-seqstart_t);
+    if ((seqlen-((suftab_s-seqstart_s)+maxlen)) == suftab_t-seqstart_t) 
+    {
+      method = 'P';
+    }
+  }
+
   if (absolute)
   { 
     printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
@@ -103,17 +124,9 @@ void print_repeat_mirrored(GT_UNUSED void *info,
                                               gt_encseq_seqstartpos(
                                               encseq, seqnum_s);
     printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " "
-           GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method,
-           maxlen, seqnum_t, suftab_t-pos_corr_t,score);
-    GtUword idx;
-    for (idx=0;idx<maxlen;idx++)
-    {
-      printf("%c",gt_encseq_get_decoded_char(encseq,
-                                                        suftab_s+idx,
-                                                        GT_READMODE_REVERSE));
-    }
-    printf("\n");
-  }
+         GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method,
+         maxlen, seqnum_t, suftab_t-pos_corr_t,score);
+  }  
 }
 
 
@@ -158,7 +171,7 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
 
   /* GtUword */
   option = gt_option_new_ulong("l", "Please specify the search length",
-      &arguments->ulong_option_searchlength,0);
+      &arguments->ulong_option_searchlength,2);
   gt_option_parser_add_option(op,option);
 
   option = gt_option_new_bool("absolute",
@@ -173,6 +186,10 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_bool("map", "Use map scan implementation",
       &arguments->bool_option_map,false);
+  gt_option_parser_add_option(op,option);
+
+  option = gt_option_new_bool("mirrored", "Use mirrored index",
+      &arguments->bool_option_mirror,false);
   gt_option_parser_add_option(op,option);
   return op;
 }
@@ -216,13 +233,11 @@ static int gt_smax_runner(int argc,
   }
   printf("# argv[0]=%s\n", argv[0]);
 
-  if (!had_err)
-  {
-    GtProcessSmaxpairs process_smaxpairs;
-    void *process_smaxpairsdata;
+  GtProcessSmaxpairs process_smaxpairs;
+  void *process_smaxpairsdata;
     
-    Sequentialsuffixarrayreader *ssar = 
-      gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
+  Sequentialsuffixarrayreader *ssar = 
+    gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
                                           arguments->index_option_smax,0),
                                           SARR_LCPTAB |
                                           SARR_SUFTAB |
@@ -233,12 +248,27 @@ static int gt_smax_runner(int argc,
                                           !arguments->bool_option_map, 
                                           logger,
                                           err);
-
-    if (arguments->bool_option_map)
+  if (!gt_error_is_set(err))
+  {
+    if (gt_encseq_is_mirrored(gt_encseqSequentialsuffixarrayreader(ssar)))
+    {
+      if (arguments->bool_option_mirror)
+      {
+        process_smaxpairs = print_repeat_mirrored;
+        process_smaxpairsdata = NULL;
+      } else
+      {
+        printf("you supplied a mirrored index, please use option -mirrored\n");
+        return -1;
+      }
+    } else
     {
       process_smaxpairs = print_repeat;
       process_smaxpairsdata = NULL;
+    }
 
+    if (arguments->bool_option_map)
+    {
       if (gt_runsmaxlcpvalues(ssar,
                               arguments->ulong_option_searchlength,
                               arguments->bool_option_absolute,
@@ -252,9 +282,6 @@ static int gt_smax_runner(int argc,
       }
     } else 
     {
-      process_smaxpairs = print_repeat;
-      process_smaxpairsdata = NULL;
-
       if (gt_runlinsmax(ssar,
                         arguments->ulong_option_searchlength,
                         arguments->bool_option_absolute,
