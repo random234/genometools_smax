@@ -32,7 +32,9 @@ typedef struct {
   bool bool_option_absolute;
   bool bool_option_silent;
   bool bool_option_map;
-  bool bool_option_mirror;
+  bool bool_option_compact;
+  bool bool_option_direct;
+  bool bool_option_palindromic;
 } SmaxArguments;
 
 void print_repeat(GT_UNUSED void *info,
@@ -81,7 +83,7 @@ void print_repeat_mirrored(GT_UNUSED void *info,
                   bool absolute)
 {
   GtUword score = maxlen * 2;
-  GtUword halftotal_seqnum = gt_encseq_num_of_sequences(encseq)/2;
+  GtUword halftotal_seqnum = GT_DIV2(gt_encseq_num_of_sequences(encseq));
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
   GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
 
@@ -95,15 +97,9 @@ void print_repeat_mirrored(GT_UNUSED void *info,
     seqnum_s = seqnum_t;
     seqnum_t = tmp;
   }
-  if (seqnum_t - halftotal_seqnum == seqnum_s)
+  if (seqnum_s < halftotal_seqnum && seqnum_t >= halftotal_seqnum)
   {
-    GtUword seqlen = gt_encseq_seqlength(encseq, seqnum_s);
-    GtUword seqstart_s = gt_encseq_seqstartpos(encseq,seqnum_s);
-    GtUword seqstart_t = gt_encseq_seqstartpos(encseq,seqnum_t);
-    if ((seqlen-((suftab_s-seqstart_s)+maxlen)) == suftab_t-seqstart_t) 
-    {
-      method = 'P';
-    }
+    method = 'P';
   }
 
   if (absolute)
@@ -181,9 +177,18 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
       &arguments->bool_option_map,false);
   gt_option_parser_add_option(op,option);
 
-  option = gt_option_new_bool("mirrored", "Use mirrored index",
-      &arguments->bool_option_mirror,false);
+  option = gt_option_new_bool("compact", "Show compact output ",
+      &arguments->bool_option_compact,false);
   gt_option_parser_add_option(op,option);
+
+  option = gt_option_new_bool("d", "Display only matches on forward strand",
+      &arguments->bool_option_direct,true);
+  gt_option_parser_add_option(op,option);
+
+  option = gt_option_new_bool("p", "Display palindromic matches ",
+      &arguments->bool_option_palindromic,false);
+  gt_option_parser_add_option(op,option);
+
   return op;
 }
 
@@ -210,11 +215,11 @@ static int gt_smax_runner(int argc,
                           GtError *err)
 {
   SmaxArguments *arguments = tool_arguments;
-  GT_UNUSED GtLogger *logger;
+  GtLogger *logger;
+  Sequentialsuffixarrayreader *ssar;
+  int had_err = 0;
   logger = gt_logger_new(arguments->bool_option_smax, GT_LOGGER_DEFLT_PREFIX,
       stdout);
-
-  int had_err = 0;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -229,8 +234,8 @@ static int gt_smax_runner(int argc,
   GtProcessSmaxpairs process_smaxpairs;
   void *process_smaxpairsdata;
     
-  Sequentialsuffixarrayreader *ssar = 
-    gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
+ 
+  if((ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
                                           arguments->index_option_smax,0),
                                           SARR_LCPTAB |
                                           SARR_SUFTAB |
@@ -240,20 +245,12 @@ static int gt_smax_runner(int argc,
                                           /* map = false */
                                           !arguments->bool_option_map, 
                                           logger,
-                                          err);
-  if (!gt_error_is_set(err))
+                                          err)))
   {
     if (gt_encseq_is_mirrored(gt_encseqSequentialsuffixarrayreader(ssar)))
     {
-      if (arguments->bool_option_mirror)
-      {
-        process_smaxpairs = print_repeat_mirrored;
-        process_smaxpairsdata = NULL;
-      } else
-      {
-        printf("you supplied a mirrored index, please use option -mirrored\n");
-        return -1;
-      }
+      process_smaxpairs = print_repeat_mirrored;
+      process_smaxpairsdata = NULL;
     } else
     {
       process_smaxpairs = print_repeat;
@@ -271,7 +268,7 @@ static int gt_smax_runner(int argc,
                               process_smaxpairsdata,
                               err) != 0)
       {
-        had_err = true;
+        had_err = -1;
       }
     } else 
     {
@@ -283,9 +280,12 @@ static int gt_smax_runner(int argc,
                         process_smaxpairsdata,
                         err) != 0)
       {
-        had_err = true;
+        had_err = -1;
       }
     }
+  } else 
+  {
+    had_err = -1;
   }
   
   gt_logger_delete(logger);
