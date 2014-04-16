@@ -97,16 +97,9 @@ void print_repeat_mirrored(GT_UNUSED void *info,
   }
   if (seqnum_t - halftotal_seqnum == seqnum_s)
   {
-//    printf("seqnum_s: " GT_WU " seqnum_t: " GT_WU "\n", seqnum_s, seqnum_t);
     GtUword seqlen = gt_encseq_seqlength(encseq, seqnum_s);
     GtUword seqstart_s = gt_encseq_seqstartpos(encseq,seqnum_s);
     GtUword seqstart_t = gt_encseq_seqstartpos(encseq,seqnum_t);
-//    printf("seqlen: " GT_WU "\n", seqlen);
-//    printf("suftab_s: " GT_WU "\n", seqstart_s);
-//    printf("suftab_t: " GT_WU "\n", seqstart_t);
-
-//    printf("calc_s: " GT_WU "\n", (seqlen-((suftab_s-seqstart_s)+maxlen)));
-//    printf("calc_t: " GT_WU "\n", suftab_t-seqstart_t);
     if ((seqlen-((suftab_s-seqstart_s)+maxlen)) == suftab_t-seqstart_t) 
     {
       method = 'P';
