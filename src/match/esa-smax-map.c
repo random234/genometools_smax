@@ -105,7 +105,6 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
 {
   GtESASmaxLcpintervalsVisitor *lev;
   GtUword s,t;
-  char method = 'D';
   GtLcpmaxintervalinfo *ret_info = (GtLcpmaxintervalinfo *) info;
   gt_assert(ev && err);
   lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
@@ -125,7 +124,6 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
                               lcp,
                               lev->suftab[s],
                               lev->suftab[t],
-                              method,
                               lev->absolute);
           }
         }

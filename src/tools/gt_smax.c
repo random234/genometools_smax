@@ -42,12 +42,12 @@ void print_repeat(GT_UNUSED void *info,
                   GtUword maxlen,
                   GtUword suftab_s,
                   GtUword suftab_t,
-                  char method,
                   bool absolute)
 {
   GtUword score = maxlen * 2;
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
   GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
+  char method = 'D';
   if (suftab_s > suftab_t)
   {
     GtUword tmp;
@@ -79,13 +79,13 @@ void print_repeat_mirrored(GT_UNUSED void *info,
                   GtUword maxlen,
                   GtUword suftab_s,
                   GtUword suftab_t,
-                  char method,
                   bool absolute)
 {
   GtUword score = maxlen * 2;
   GtUword halftotal_seqnum = GT_DIV2(gt_encseq_num_of_sequences(encseq));
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
   GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
+  char method = 'D';
 
   if (suftab_s > suftab_t)
   {

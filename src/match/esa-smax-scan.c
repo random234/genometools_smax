@@ -36,7 +36,6 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
   if (!haserr)
   {
     GtTimer *linsmaxprogress = NULL;
-    char method = 'D';
     GtUword lcpvalue,
               previoussuffix,
               idx,
@@ -106,7 +105,6 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
                                       currentlcpmax,
                                       suftab_arr.spaceGtUword[s],
                                       suftab_arr.spaceGtUword[t],
-                                      method,
                                       absolute);
                 }
               }
