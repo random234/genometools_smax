@@ -23,15 +23,16 @@
 #include "match/esa-smax.h"
 
 bool gt_esa_smax_verify_supmax(const GtEncseq *encseq,
-                              GtArrayGtUlong *suftab_arr,
+                              const GtUword *suftabsubset,
+                              const GtUword suftabsubset_size,
                               GtBittab *marktab)
 {
   GtUword idx;
   gt_bittab_unset(marktab);
 
-  for (idx = 0;idx<suftab_arr->nextfreeGtUlong;idx++)
+  for (idx=0;idx<suftabsubset_size;idx++)
   {
-    GtUword suf = suftab_arr->spaceGtUlong[idx];
+    GtUword suf = suftabsubset[idx];
     if (suf > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,

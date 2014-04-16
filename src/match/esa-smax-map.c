@@ -34,7 +34,7 @@ struct GtESASmaxLcpintervalsVisitor {
   GtBittab *marktab;
   const GtEncseq *encseq;
   const GtUword *suftab;
-  GtArrayGtUlong suftab_arr;
+  GtUword suftabsubset;
   GtProcessSmaxpairs process_smaxpairs;
   void *process_smaxpairsdata;
 };
@@ -61,7 +61,6 @@ static void gt_esa_smax_lcpitvs_visitor_delete_info(GtESAVisitorInfo *vi,
   GtESASmaxLcpintervalsVisitor *lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
   gt_bittab_delete(lev->marktab);
   lev->marktab = NULL;
-  GT_FREEARRAY(&(lev->suftab_arr),GtUlong);
   gt_free(vi);
 }
 
@@ -105,7 +104,7 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
     GtError *err)
 {
   GtESASmaxLcpintervalsVisitor *lev;
-  GtUword s,t,idx;
+  GtUword s,t;
   char method = 'D';
   GtLcpmaxintervalinfo *ret_info = (GtLcpmaxintervalinfo *) info;
   gt_assert(ev && err);
@@ -113,12 +112,7 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
 
   if (lcp >= lev->searchlength && ret_info->maxlcpinterval)
   {
-    lev->suftab_arr.nextfreeGtUlong = 0;
-    for (idx=lb;idx<=rb;idx++)
-    {
-      GT_STOREINARRAY(&(lev->suftab_arr),GtUlong,32,lev->suftab[idx]);
-    }
-    if (gt_esa_smax_verify_supmax(lev->encseq,&(lev->suftab_arr),lev->marktab))
+    if (gt_esa_smax_verify_supmax(lev->encseq,&(lev->suftab[lb]),(rb+1)-lb,lev->marktab))
     {
       for (s=lb;s<rb;s++)
       {
@@ -178,7 +172,6 @@ GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
   lev->marktab = gt_bittab_new(gt_alphabet_size(
                                 gt_encseq_alphabet(
                                 ssar->encseq)));
-  GT_INITARRAY(&(lev->suftab_arr),GtUlong);
   lev->encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   lev->suftab = gt_suftabSequentialsuffixarrayreader(ssar);
   lev->process_smaxpairs = process_smaxpairs;

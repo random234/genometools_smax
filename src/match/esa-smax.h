@@ -32,7 +32,8 @@ typedef void (*GtProcessSmaxpairs)(void *,
                                   bool);
 
 bool gt_esa_smax_verify_supmax(const GtEncseq *,
-                              GtArrayGtUlong *,
+                              const GtUword *,
+                              const GtUword,
                               GtBittab *);
 
 void print_repeat(void *,

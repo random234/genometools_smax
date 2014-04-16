@@ -31,12 +31,8 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
     void *process_smaxpairsdata,
     GtError *err)
 {
-  bool haserr = false;
+  int haserr = 0;
   
-  if (ssar == NULL)
-  {
-    haserr = true;
-  }
   if (!haserr)
   {
     GtTimer *linsmaxprogress = NULL;
@@ -45,16 +41,18 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
               previoussuffix,
               idx,
               nonspecials,
-              currentlcpmax;
+              currentlcpmax,
+              *suftabsubset;
+              
     GtBittab *marktab;
-    GtArrayGtUlong suftab_arr;
+    GtArrayGtUword suftab_arr;
     const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
     bool in_interval = true;
 
     gt_error_check(err);
     marktab = gt_bittab_new(gt_alphabet_size(gt_encseq_alphabet(encseq)));
     nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-    GT_INITARRAY(&suftab_arr,GtUlong);
+    GT_INITARRAY(&suftab_arr,GtUword);
 
     gt_showtime_enable();
     if (gt_showtime_enabled())
@@ -80,32 +78,34 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
       {
         in_interval = true;
         currentlcpmax = lcpvalue;
-        suftab_arr.nextfreeGtUlong = 0;
+        suftab_arr.nextfreeGtUword = 0;
       }
       if (lcpvalue == currentlcpmax && in_interval)
       {
-        GT_STOREINARRAY(&suftab_arr,GtUlong,32,previoussuffix);
+        GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);
       }
       if (lcpvalue < currentlcpmax)
       {
         if (in_interval && currentlcpmax >= searchlength)
         {
-          GT_STOREINARRAY(&suftab_arr,GtUlong,32,previoussuffix);
-          if (gt_esa_smax_verify_supmax(encseq, &suftab_arr, marktab))
+          GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);
+          suftabsubset = suftab_arr.spaceGtUword;
+          if (gt_esa_smax_verify_supmax(encseq, suftabsubset,
+                suftab_arr.nextfreeGtUword,marktab))
           {
             GtUword s;
-            for (s = 0;s<suftab_arr.nextfreeGtUlong;s++)
+            for (s = 0;s<suftab_arr.nextfreeGtUword;s++)
             {
               GtUword t;
-              for (t = s+1;t<suftab_arr.nextfreeGtUlong;t++)
+              for (t = s+1;t<suftab_arr.nextfreeGtUword;t++)
               {
                 if (!silent)
                 {
                   process_smaxpairs (process_smaxpairsdata,
                                       encseq,
                                       currentlcpmax,
-                                      suftab_arr.spaceGtUlong[s],
-                                      suftab_arr.spaceGtUlong[t],
+                                      suftab_arr.spaceGtUword[s],
+                                      suftab_arr.spaceGtUword[t],
                                       method,
                                       absolute);
                 }
@@ -115,7 +115,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
         }
         in_interval = false;
         currentlcpmax = lcpvalue;
-        suftab_arr.nextfreeGtUlong = 0;
+        suftab_arr.nextfreeGtUword = 0;
       }
     }
 
@@ -124,7 +124,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
       gt_timer_show_progress_final(linsmaxprogress, stdout);
       gt_timer_delete(linsmaxprogress);
     }
-    GT_FREEARRAY(&suftab_arr,GtUlong);
+    GT_FREEARRAY(&suftab_arr,GtUword);
     gt_bittab_delete(marktab);
   }
   if (ssar != NULL)
