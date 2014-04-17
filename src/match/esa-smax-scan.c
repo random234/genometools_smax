@@ -40,8 +40,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
               previoussuffix,
               idx,
               nonspecials,
-              currentlcpmax,
-              *suftabsubset;
+              currentlcpmax;
               
     GtBittab *marktab;
     GtArrayGtUword suftab_arr;
@@ -88,8 +87,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
         if (in_interval && currentlcpmax >= searchlength)
         {
           GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);
-          suftabsubset = suftab_arr.spaceGtUword;
-          if (gt_esa_smax_verify_supmax(encseq, suftabsubset,
+          if (gt_esa_smax_verify_supmax(encseq, suftab_arr.spaceGtUword,
                 suftab_arr.nextfreeGtUword,marktab))
           {
             GtUword s;
