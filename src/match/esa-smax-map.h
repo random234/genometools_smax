@@ -29,7 +29,6 @@ const GtESAVisitorClass* gt_esa_smax_lcpitvs_visitor_class(void);
 GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(Sequentialsuffixarrayreader *,
                                               GtUword,
                                               bool,
-                                              bool,
                                               GtProcessSmaxpairs,
                                               void *,
                                               GtTimer *);

@@ -26,7 +26,6 @@ int gt_runsmaxlcpvalues(Sequentialsuffixarrayreader *,
                         GtUword,
                         bool,
                         bool,
-                        bool,
                         GtProcessSmaxpairs,
                         void *,
                         GtError *);

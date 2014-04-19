@@ -24,7 +24,6 @@
 inline int gt_runlinsmax(Sequentialsuffixarrayreader *,
                         GtUword,
                         bool,
-                        bool,
                         GtProcessSmaxpairs,
                         void *,
                         GtError *);

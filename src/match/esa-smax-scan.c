@@ -25,7 +25,6 @@
 
 int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
     GtUword searchlength,
-    bool absolute,
     bool silent,
     GtProcessSmaxpairs process_smaxpairs,
     void *process_smaxpairsdata,
@@ -102,8 +101,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
                                       encseq,
                                       currentlcpmax,
                                       suftab_arr.spaceGtUword[s],
-                                      suftab_arr.spaceGtUword[t],
-                                      absolute);
+                                      suftab_arr.spaceGtUword[t]);
                 }
               }
             }

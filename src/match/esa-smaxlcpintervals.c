@@ -27,7 +27,6 @@
 
 int gt_runsmaxlcpvalues(Sequentialsuffixarrayreader *ssar,
     GtUword searchlength,
-    bool absolute,
     bool silent,
     bool bottomup,
     GtProcessSmaxpairs process_smaxpairs,
@@ -65,7 +64,6 @@ int gt_runsmaxlcpvalues(Sequentialsuffixarrayreader *ssar,
       GtESAVisitor *elv = gt_esa_smax_lcpitvs_visitor_new(
                                                       ssar,
                                                       searchlength,
-                                                      absolute,
                                                       silent,
                                                       process_smaxpairs,
                                                       process_smaxpairsdata,

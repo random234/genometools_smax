@@ -29,7 +29,6 @@ struct GtESASmaxLcpintervalsVisitor {
   Sequentialsuffixarrayreader *ssar;
   GtUword searchlength;
   GtTimer *smaxprogress;
-  bool absolute;
   bool silent;
   GtBittab *marktab;
   const GtEncseq *encseq;
@@ -123,8 +122,7 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
                               lev->encseq,
                               lcp,
                               lev->suftab[s],
-                              lev->suftab[t],
-                              lev->absolute);
+                              lev->suftab[t]);
           }
         }
       }
@@ -153,7 +151,6 @@ const GtESAVisitorClass* gt_esa_smax_lcpitvs_visitor_class()
 GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
                                       Sequentialsuffixarrayreader *ssar,
                                       GtUword searchlength,
-                                      bool absolute,
                                       bool silent,
                                       GtProcessSmaxpairs process_smaxpairs,
                                       void *process_smaxpairsdata,
@@ -164,7 +161,6 @@ GtESAVisitor* gt_esa_smax_lcpitvs_visitor_new(
   lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
   lev->ssar = ssar;
   lev->searchlength = searchlength;
-  lev->absolute = absolute;
   lev->smaxprogress = smaxprogress;
   lev->silent = silent;
   lev->marktab = gt_bittab_new(gt_alphabet_size(
