@@ -119,7 +119,7 @@ void print_repeat_both(void *info,
   }
 //printf("suftab_s " GT_WU " suftab_t " GT_WU "\n",suftab_s,suftab_t);
 
-  if ((seqnum_s || seqnum_t) >= halftotal_seqnum)
+  if (seqnum_t >= halftotal_seqnum)
   {
     printinfo->method = 'P';
     if (seqnum_s >= halftotal_seqnum)
