@@ -35,16 +35,19 @@ typedef struct {
   bool bool_option_compact;
   bool bool_option_direct;
   bool bool_option_palindromic;
+  bool bool_option_sequencedesc;
 } SmaxArguments;
 
 typedef struct {
   bool absolute;
   bool direct;
   bool palindromic;
+  bool sequencedesc;
+  char method;
 } PrintArguments;
 
 
-void print_repeat(GT_UNUSED void *info,
+void print_repeat(void *info,
                   const GtEncseq *encseq,
                   GtUword maxlen,
                   GtUword suftab_s,
@@ -54,7 +57,7 @@ void print_repeat(GT_UNUSED void *info,
   GtUword score = maxlen * 2;
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
   GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
-  char method = 'D';
+
   if (suftab_s > suftab_t)
   {
     GtUword tmp;
@@ -68,7 +71,7 @@ void print_repeat(GT_UNUSED void *info,
   if (printargs->absolute)
   { 
     printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
-          suftab_s, method, maxlen, suftab_t,score);
+          suftab_s, printargs->method, maxlen, suftab_t,score);
   } else
   {
     GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t),
@@ -76,23 +79,33 @@ void print_repeat(GT_UNUSED void *info,
                                               gt_encseq_seqstartpos(
                                               encseq, seqnum_s);
     printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " "
-           GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method,
-           maxlen, seqnum_t, suftab_t-pos_corr_t,score);
+           GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s,
+           printargs->method, maxlen, seqnum_t, suftab_t-pos_corr_t,score);
+  }
+
+  if (printargs->sequencedesc)
+  {
+    GtUword idx;
+    printf("Sequence: ");
+    for (idx = suftab_s; idx < suftab_s+(maxlen); idx++)
+    {
+      printf("%c",gt_encseq_get_decoded_char(encseq,idx,GT_READMODE_FORWARD));
+    }
+    printf("\n");
   }
 }
 
-void print_repeat_mirrored(GT_UNUSED void *info,
-                  const GtEncseq *encseq,
-                  GtUword maxlen,
-                  GtUword suftab_s,
-                  GtUword suftab_t)
+void print_repeat_both(void *info,
+                        const GtEncseq *encseq,
+                        GtUword maxlen,
+                        GtUword suftab_s,
+                        GtUword suftab_t)
 {
-  PrintArguments *printargs = (PrintArguments *) info;
-  GtUword score = maxlen * 2;
+  PrintArguments *printinfo = (PrintArguments *) info;
   GtUword halftotal_seqnum = GT_DIV2(gt_encseq_num_of_sequences(encseq));
   GtUword seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
   GtUword seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
-  char method = 'D';
+  printinfo->method = 'D';
 
   if (suftab_s > suftab_t)
   {
@@ -104,40 +117,31 @@ void print_repeat_mirrored(GT_UNUSED void *info,
     seqnum_s = seqnum_t;
     seqnum_t = tmp;
   }
-  if (seqnum_s < halftotal_seqnum && seqnum_t >= halftotal_seqnum)
+//printf("suftab_s " GT_WU " suftab_t " GT_WU "\n",suftab_s,suftab_t);
+
+  if ((seqnum_s || seqnum_t) >= halftotal_seqnum)
   {
-    method = 'P';
-  /*  printf("" GT_WU "\n",GT_REVERSEPOS(gt_encseq_total_length(encseq), 0));
-    printf("" GT_WU "\n", suftab_t);
-    printf("" GT_WU "\n", suftab_t-gt_encseq_seqstartpos(encseq, seqnum_t));
-    */
-    if (printargs->absolute)
+    printinfo->method = 'P';
+    if (seqnum_s >= halftotal_seqnum)
     {
-      // falsche Berechnung
-      suftab_t = (GT_REVERSEPOS(gt_encseq_total_length(encseq), 
-                  (suftab_t-gt_encseq_seqstartpos(encseq, seqnum_t))
-                  )-maxlen+1)-gt_encseq_seqstartpos(encseq, halftotal_seqnum);
-    } else 
-    {
-      suftab_t = GT_REVERSEPOS(gt_encseq_total_length(encseq),
-                (suftab_t-gt_encseq_seqstartpos(encseq, seqnum_t)))-maxlen+1;
+      suftab_s = GT_REVERSEPOS(gt_encseq_total_length(encseq),suftab_s);
+      suftab_s = (suftab_s+1)-maxlen;
+      seqnum_s = seqnum_s-halftotal_seqnum;
     }
+    suftab_t = GT_REVERSEPOS(gt_encseq_total_length(encseq),suftab_t);
+    suftab_t = (suftab_t+1)-maxlen;
+    seqnum_t = seqnum_t-halftotal_seqnum;
   }
 
-  if (printargs->absolute)
-  { 
-    printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
-          suftab_s, method, maxlen, suftab_t-gt_encseq_seqstartpos(encseq, halftotal_seqnum),score);
-  } else
+  if (printinfo->direct && printinfo->method == 'D')
   {
-    GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t);
-    GtUword pos_corr_s = gt_encseq_seqstartpos(encseq, seqnum_s);
-    printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " "
-         GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s, method,
-         maxlen, seqnum_t, suftab_t-pos_corr_t,score);
-  }  
- }
-
+    print_repeat(info,encseq,maxlen,suftab_s,suftab_t);
+  }
+  if (printinfo->palindromic && printinfo->method == 'P')
+  {
+    print_repeat(info, encseq,maxlen,suftab_s,suftab_t);
+  }
+}
 static void* gt_smax_arguments_new(void)
 {
   SmaxArguments *arguments = gt_calloc(1, sizeof *arguments);
@@ -208,6 +212,10 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
       &arguments->bool_option_palindromic,false);
   gt_option_parser_add_option(op,option);
 
+  option = gt_option_new_bool("s", "Display sequence ",
+            &arguments->bool_option_sequencedesc,false);
+    gt_option_parser_add_option(op,option);
+
   return op;
 }
 
@@ -236,13 +244,17 @@ static int gt_smax_runner(int argc,
   SmaxArguments *arguments = tool_arguments;
   GtLogger *logger;
   Sequentialsuffixarrayreader *ssar;
+  GtProcessSmaxpairs process_smaxpairs;
+  void *process_smaxpairsdata;
   PrintArguments *printargs = gt_malloc(sizeof(PrintArguments));
   int had_err = 0;
   logger = gt_logger_new(arguments->bool_option_smax, GT_LOGGER_DEFLT_PREFIX,
       stdout);
+
   printargs->absolute = arguments->bool_option_absolute;
   printargs->direct = arguments->bool_option_direct;
   printargs->palindromic = arguments->bool_option_palindromic;
+  printargs->sequencedesc = arguments->bool_option_sequencedesc;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -254,10 +266,6 @@ static int gt_smax_runner(int argc,
   }
   printf("# argv[0]=%s\n", argv[0]);
 
-  GtProcessSmaxpairs process_smaxpairs;
-  void *process_smaxpairsdata;
-    
- 
   if((ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
                                           arguments->index_option_smax,0),
                                           SARR_LCPTAB |
@@ -272,11 +280,12 @@ static int gt_smax_runner(int argc,
   {
     if (gt_encseq_is_mirrored(gt_encseqSequentialsuffixarrayreader(ssar)))
     {
-      process_smaxpairs = print_repeat_mirrored;
+      process_smaxpairs = print_repeat_both;
       process_smaxpairsdata = (void *) printargs;
     } else
     {
       process_smaxpairs = print_repeat;
+      printargs->method = 'D';
       process_smaxpairsdata = (void *) printargs;
     }
 
