@@ -59,13 +59,6 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
       gt_timer_start(linsmaxprogress);
     }
     
-/*    printf("" GT_WU "\n",gt_encseq_num_of_sequences(encseq));
-    for (idx = 0; idx <= nonspecials; idx++)
-    {
-        printf("%c",gt_encseq_get_decoded_char(encseq,idx,GT_READMODE_FORWARD));
-    }
-    printf("\n");
-*/
     currentlcpmax = 0;
     for (idx = 0; idx < nonspecials; idx++)
     {
@@ -89,22 +82,24 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
           if (gt_esa_smax_verify_supmax(encseq, suftab_arr.spaceGtUword,
                 suftab_arr.nextfreeGtUword,marktab))
           {
-            GtUword s;
+//            printf("Start Interval Output");
+/*            GtUword s;
             for (s = 0;s<suftab_arr.nextfreeGtUword;s++)
             {
               GtUword t;
               for (t = s+1;t<suftab_arr.nextfreeGtUword;t++)
               {
+*/
                 if (!silent)
                 {
                   process_smaxpairs (process_smaxpairsdata,
                                       encseq,
                                       currentlcpmax,
-                                      suftab_arr.spaceGtUword[s],
-                                      suftab_arr.spaceGtUword[t]);
+                                      suftab_arr.spaceGtUword,
+                                      suftab_arr.nextfreeGtUword);
                 }
-              }
-            }
+//              }
+//            }
           }
         }
         in_interval = false;
@@ -121,9 +116,10 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
     GT_FREEARRAY(&suftab_arr,GtUword);
     gt_bittab_delete(marktab);
   }
-  if (ssar != NULL)
+/*  if (ssar != NULL)
   {
     gt_freeSequentialsuffixarrayreader(&ssar);
   }
+*/
   return haserr ? -1 : 0;
 }
