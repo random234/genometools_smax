@@ -119,6 +119,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
 /*  if (ssar != NULL)
   {
     gt_freeSequentialsuffixarrayreader(&ssar);
+    ssar = NULL;
   }
 */
   return haserr ? -1 : 0;

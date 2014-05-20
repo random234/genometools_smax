@@ -75,11 +75,11 @@ int gt_runsmaxlcpvalues(Sequentialsuffixarrayreader *ssar,
       gt_esa_visitor_delete(elv);
     }
   }
-  if (ssar != NULL)
+/*  if (ssar != NULL)
   {
     gt_freeSequentialsuffixarrayreader(&ssar);
   }
-
+*/
   if (smaxprogress != NULL)
   {
 /* gt_timer_show_progress(smaxprogress,"%GT_WD.%06GT_WDs real %GT_WDs
