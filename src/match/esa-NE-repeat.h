@@ -23,7 +23,11 @@
 #include "core/showtime.h"
 #include "match/esa-NE-repeat.h"
 
-int gt_run_NE_repeats(GtStrArray *,GtUword ,bool,bool,GT_UNUSED bool outedges,
-    GtLogger *,GtError *);
+int gt_run_NE_repeats(Sequentialsuffixarrayreader *,
+                      GtUword,
+                      bool,
+                      GtProcessSmaxpairs,
+                      void *,
+                      GtError *);
 
 #endif

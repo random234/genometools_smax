@@ -15,46 +15,45 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "esa-seqread.h"
 #include "core/encseq_api.h"
 #include "core/showtime.h"
+#include "core/stack-inlined.h"
+#include "match/esa-seqread.h"
+#include "match/esa-smax.h"
 
 /* vorraussichtlice Stackgroesse muss geschaetzt werden um
  * konstante Stackgroesse sinnvoll zu waehlen.
  */
 
-int gt_run_NE_repeats(GtStrArray *inputindex,
-    GT_UNUSED GtUword searchlength,
-    GT_UNUSED bool absolute,
-    GT_UNUSED bool silent,
-    GT_UNUSED bool outedges,
-    GtLogger *logger,
-    GtError *err)
+typedef struct
+{
+  GtUword position;
+  GtUword lcpvalue;
+} Lcpstack_elem;
+
+int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
+                      GT_UNUSED GtUword searchlength,
+                      GT_UNUSED bool silent,
+                      GT_UNUSED GtProcessSmaxpairs process_smaxpairs,
+                      GT_UNUSED void *process_smaxpairsdata,
+                      GtError *err)
 {
   bool haserr = false;
   gt_error_check(err);
-  Sequentialsuffixarrayreader *ssar =
-    gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
-        inputindex,0),
-        SARR_LCPTAB |
-        SARR_SUFTAB |
-        SARR_ESQTAB,
-        false,
-        /* SEQ_scan, */
-        logger,
-        err);
   GtTimer *nerepeat_progress = NULL;
-  GT_UNUSED char method = 'D';
+//  GtStack *lcpstack;
   GT_UNUSED GtUword lcpvalue,
             previoussuffix,
             idx,
             nonspecials,
             sumsuftab,
             sumlcptab,
-            max;
+            max = 0,
+            period = -1;
 
   GT_UNUSED const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
+  //GT_STACK_INIT(&lcpstack,Lcpstack_elem);
 
   gt_showtime_enable();
   if (gt_showtime_enabled())
@@ -72,6 +71,24 @@ int gt_run_NE_repeats(GtStrArray *inputindex,
     SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     sumsuftab += previoussuffix; /* silly but guarantees that loop is not
                                   eliminated by compiler */
+
+    while (period < max)
+    {
+      idx++;
+      period = max;
+      max = lcpvalue;
+      if ((max > period) && (max >= searchlength))
+      { 
+
+        // push to stack
+      }
+    }
+
+/*    while (top(LB).lcp <= max)
+    {
+      if (top(LB).lcp
+    }
+    */
   }
 
   if (nerepeat_progress != NULL)

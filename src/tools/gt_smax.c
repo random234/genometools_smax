@@ -21,6 +21,7 @@
 #include "core/logger.h"
 #include "core/error.h"
 #include "match/esa-seqread.h"
+#include "match/esa-scanprj.h"
 #include "match/esa-smax.h"
 #include "match/esa-smaxlcpintervals.h"
 #include "match/esa-smax-scan.h"
@@ -36,6 +37,7 @@ typedef struct {
   bool bool_option_direct;
   bool bool_option_palindromic;
   bool bool_option_sequencedesc;
+  bool bool_option_non_extendible;
 } SmaxArguments;
 
 typedef struct {
@@ -44,6 +46,7 @@ typedef struct {
   bool palindromic;
   bool sequencedesc;
   bool compact;
+  bool non_extendible;
   char method;
   GtStr *output;
 } PrintArguments;
@@ -302,7 +305,11 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_bool("s", "Display sequence ",
             &arguments->bool_option_sequencedesc,false);
-    gt_option_parser_add_option(op,option);
+  gt_option_parser_add_option(op,option);
+
+  option = gt_option_new_bool("ne", "Non-extendible repeats ",
+      &arguments->bool_option_non_extendible,false);
+  gt_option_parser_add_option(op,option);
 
   return op;
 }
@@ -313,6 +320,10 @@ static int gt_smax_arguments_check(GT_UNUSED int rest_argc,
 {
   SmaxArguments *arguments = tool_arguments;
   int had_err = 0;
+//  GtFile *file;
+//  GtHashmap *prj_hash;
+/* write index option parser which checks compatability of supplied indizes */
+
   gt_error_check(err);
   gt_assert(arguments);
 
@@ -345,6 +356,7 @@ static int gt_smax_runner(int argc,
   printargs->palindromic = arguments->bool_option_palindromic;
   printargs->sequencedesc = arguments->bool_option_sequencedesc;
   printargs->compact = arguments->bool_option_compact;
+  printargs->non_extendible = arguments->bool_option_non_extendible;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -368,7 +380,6 @@ static int gt_smax_runner(int argc,
                                           logger,
                                           err)))
   {
-//    process_smaxpairsdata = (void *) printargs;
     if (gt_encseq_is_mirrored(gt_encseqSequentialsuffixarrayreader(ssar)) 
         &! printargs->palindromic)
     {
@@ -397,28 +408,34 @@ static int gt_smax_runner(int argc,
     }
     if (!had_err)
     {
-      if (arguments->bool_option_map)
+      if (printargs->non_extendible)
       {
-        if (gt_runsmaxlcpvalues(ssar,
-                                arguments->ulong_option_searchlength,
-                                arguments->bool_option_silent, 
-                                true, 
-                                process_smaxpairs,
-                                process_smaxpairsdata,
-                                err) != 0)
-        {
-          had_err = -1;
-        }
+        
       } else 
       {
-        if (gt_runlinsmax(ssar,
-                          arguments->ulong_option_searchlength,
-                          arguments->bool_option_silent,
-                          process_smaxpairs,
-                          process_smaxpairsdata,
-                          err) != 0)
+        if (arguments->bool_option_map)
         {
-          had_err = -1;
+          if (gt_runsmaxlcpvalues(ssar,
+                                  arguments->ulong_option_searchlength,
+                                  arguments->bool_option_silent, 
+                                  true, 
+                                  process_smaxpairs,
+                                  process_smaxpairsdata,
+                                  err) != 0)
+          {
+            had_err = -1;
+          }
+        } else 
+        {
+          if (gt_runlinsmax(ssar,
+                            arguments->ulong_option_searchlength,
+                            arguments->bool_option_silent,
+                            process_smaxpairs,
+                            process_smaxpairsdata,
+                            err) != 0)
+          {
+            had_err = -1;
+          }
         }
       }
     } 
