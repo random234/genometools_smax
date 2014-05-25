@@ -31,7 +31,8 @@ typedef struct {
   GtUword ulong_option_searchlength;
   bool bool_option_absolute;
   bool bool_option_silent;
-  bool bool_option_map;
+  bool bool_option_smax_linear;
+  bool bool_option_smax_map;
   bool bool_option_compact;
   bool bool_option_direct;
   bool bool_option_palindromic;
@@ -52,7 +53,7 @@ typedef struct {
 void print_sequence(const GtEncseq *encseq, GtUword pos, GtUword len)
 {
   GtUword idx;
-  printf("Sequence: ");
+//  printf("Sequence: ");
   for (idx = pos; idx < pos+len; idx++)
   {
     printf("%c",gt_encseq_get_decoded_char(encseq,idx,GT_READMODE_FORWARD));
@@ -101,6 +102,7 @@ void process_repeat_verbose(void *info,
   PrintArguments *printinfo = (PrintArguments *) info;
   GtUword s,t,suftab_s,suftab_t;
   bool reverse_direct;
+
   for (s = 0;s < suftab_size;s++)
   {
     suftab_s = suftab[s];
@@ -142,12 +144,8 @@ void process_repeat_verbose(void *info,
       {
         reverse_direct = false;
       }
-      if (printinfo->sequencedesc)
-      {
-        print_sequence(encseq, suftab_s, maxlen);
-      } 
     }
-  }
+  }  
 }
 
 void process_repeat_compact(void *info,
@@ -232,15 +230,16 @@ void process_repeat_compact(void *info,
         reverse_direct = false;
         has_output = false;
       }
-      if (printinfo->sequencedesc)
-      {
-        print_sequence(encseq, suftab_s, maxlen);
-      } 
     }
   }
   if (has_output == true)
   {
     printf(" " GT_WU "\n", maxlen*2);
+  
+    if (printinfo->sequencedesc)
+    {
+      print_sequence(encseq, suftab[0], maxlen);
+    }
   }
 }
 
@@ -298,8 +297,12 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
       &arguments->bool_option_silent,false);
   gt_option_parser_add_option(op,option);
 
+  option = gt_option_new_bool("linear", "Use linear scan implementation",
+            &arguments->bool_option_smax_linear,true);
+    gt_option_parser_add_option(op,option);
+
   option = gt_option_new_bool("map", "Use map scan implementation",
-      &arguments->bool_option_map,false);
+      &arguments->bool_option_smax_map,false);
   gt_option_parser_add_option(op,option);
 
   option = gt_option_new_bool("compact", "Show compact output ",
@@ -384,10 +387,15 @@ static int gt_smax_runner(int argc,
                                           /* scan suftab and lcptab */
                                           /* scan = true */
                                           /* map = false */
-                                          !arguments->bool_option_map, 
+                                          !arguments->bool_option_smax_map, 
                                           logger,
                                           err)))
   {
+    if (!gt_encseq_is_mirrored(gt_encseqSequentialsuffixarrayreader(ssar))
+                && arguments->bool_option_palindromic)
+    {
+      printargs->palindromic = false;
+    }
     if (printargs->compact)
     {
       process_smaxpairsdata = (void *) printargs;
@@ -397,40 +405,41 @@ static int gt_smax_runner(int argc,
       process_smaxpairsdata = (void *) printargs;
       process_smaxpairs = process_repeat_verbose;
     }
-    
-  
+
+
     if (!had_err)
     {
-      if (printargs->non_extendible)
+      if (arguments->bool_option_non_extendible)
       {
         
-      } else 
+      } 
+      
+      if (arguments->bool_option_smax_map)
       {
-        if (arguments->bool_option_map)
+        if (gt_runsmaxlcpvalues(ssar,
+                                arguments->ulong_option_searchlength,
+                                arguments->bool_option_silent, 
+                                true, 
+                                process_smaxpairs,
+                                process_smaxpairsdata,
+                                err) != 0)
         {
-          if (gt_runsmaxlcpvalues(ssar,
-                                  arguments->ulong_option_searchlength,
-                                  arguments->bool_option_silent, 
-                                  true, 
-                                  process_smaxpairs,
-                                  process_smaxpairsdata,
-                                  err) != 0)
-          {
-            had_err = -1;
-          }
-        } else 
-        {
-          if (gt_runlinsmax(ssar,
-                            arguments->ulong_option_searchlength,
-                            arguments->bool_option_silent,
-                            process_smaxpairs,
-                            process_smaxpairsdata,
-                            err) != 0)
-          {
-            had_err = -1;
-          }
+          had_err = -1;
         }
+        arguments->bool_option_smax_linear = false;
       }
+      if (arguments->bool_option_smax_linear)
+      {
+        if (gt_runlinsmax(ssar,
+                          arguments->ulong_option_searchlength,
+                          arguments->bool_option_silent,
+                          process_smaxpairs,
+                          process_smaxpairsdata,
+                          err) != 0)
+        {
+          had_err = -1;
+        }
+      }      
     } 
   } else 
   {
