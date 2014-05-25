@@ -29,7 +29,9 @@ typedef struct
 {
   GtUword position;
   GtUword lcpvalue;
-} Lcpstack_elem;
+} GtLcp_stackelem;
+
+GT_STACK_DECLARESTRUCT(GtLcp_stackelem, 32UL);
 
 int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
                       GT_UNUSED GtUword searchlength,
@@ -41,7 +43,7 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
   bool haserr = false;
   gt_error_check(err);
   GtTimer *nerepeat_progress = NULL;
-//  GtStack *lcpstack;
+  GT_UNUSED GtLcp_stackelem lcpstack;
   GT_UNUSED GtUword lcpvalue,
             previoussuffix,
             idx,
@@ -53,7 +55,7 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
 
   GT_UNUSED const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-  //GT_STACK_INIT(&lcpstack,Lcpstack_elem);
+//  GT_STACK_INIT(&lcpstack,32UL);
 
   gt_showtime_enable();
   if (gt_showtime_enabled())
