@@ -18,7 +18,6 @@
 #include "lcpinterval.h"
 #include "match/esa-seqread.h"
 #include "match/esa-bottomup.h"
-#include "core/encseq_api.h"
 #include "core/str_api.h"
 #include "match/esa-dfs.h"
 #include "core/showtime.h"
@@ -35,16 +34,6 @@ int gt_runsmaxlcpvalues(Sequentialsuffixarrayreader *ssar,
 {
   bool haserr = false;
   GtTimer *smaxprogress = NULL;
-/*  Sequentialsuffixarrayreader *ssar;
-  ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
-        inputindex,0),
-      SARR_LCPTAB |
-      SARR_SUFTAB |
-      SARR_ESQTAB,
-      false,  map suftab and lcptab 
-      logger,
-      err);
-*/
   gt_showtime_enable();
   if (gt_showtime_enabled())
   {
@@ -75,11 +64,6 @@ int gt_runsmaxlcpvalues(Sequentialsuffixarrayreader *ssar,
       gt_esa_visitor_delete(elv);
     }
   }
-/*  if (ssar != NULL)
-  {
-    gt_freeSequentialsuffixarrayreader(&ssar);
-  }
-*/
   if (smaxprogress != NULL)
   {
 /* gt_timer_show_progress(smaxprogress,"%GT_WD.%06GT_WDs real %GT_WDs
