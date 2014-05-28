@@ -342,6 +342,11 @@ static int gt_smax_arguments_check(GT_UNUSED int rest_argc,
     printf("option -ii is mandatory\n");
     had_err = -1;
   }
+  if (arguments->ulong_option_searchlength == 0)
+  {
+    printf("argument to option \"-l\" must be an integer >= 1\n");
+    had_err = -1;
+  }
 
   return had_err;
 }
