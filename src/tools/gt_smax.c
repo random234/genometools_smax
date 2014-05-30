@@ -168,7 +168,7 @@ void process_repeat_compact(void *info,
     {
       tmp = suftab_ptr[t];
       idx = t;
-      while ( idx > 1 && suftab[idx-1] > tmp )
+      while ( idx > 0 && suftab[idx-1] > tmp )
       {
         suftab_ptr[idx] = suftab[idx-1];
         idx--;
