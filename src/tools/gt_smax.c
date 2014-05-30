@@ -155,9 +155,27 @@ void process_repeat_compact(void *info,
                             const GtUword suftab_size)
 {
   PrintArguments *printinfo = (PrintArguments *) info;
-  GtUword s,t,suftab_s,suftab_t;
+  GtUword s,t,idx,suftab_s,suftab_t;
+  GtUword *suftab_ptr;
   bool reverse_direct;
   bool has_output = true;
+
+  suftab_ptr = (GtUword*)(suftab);
+  for (s = 0; s < 1; s++) 
+  {
+    GtUword tmp;
+    for (t=s+1;t < suftab_size;t++)
+    {
+      tmp = suftab_ptr[t];
+      idx = t;
+      while ( idx > 1 && suftab[idx-1] > tmp )
+      {
+        suftab_ptr[idx] = suftab[idx-1];
+        idx--;
+      }
+      suftab_ptr[idx] = tmp;
+    }
+  }
 
   for (s = 0;s < 1;s++)
   {
