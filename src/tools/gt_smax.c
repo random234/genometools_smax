@@ -148,6 +148,11 @@ void process_repeat_verbose(void *info,
   }  
 }
 
+int compare_suftabvalues(const void *val1, const void *val2) 
+{
+  return *(GtUword *)val1 - *(GtUword *)val2;
+}
+
 void process_repeat_compact(void *info,
                             const GtEncseq *encseq,
                             const GtUword maxlen,
@@ -155,35 +160,24 @@ void process_repeat_compact(void *info,
                             const GtUword suftab_size)
 {
   PrintArguments *printinfo = (PrintArguments *) info;
-  GtUword s,t,idx,suftab_s,suftab_t;
-  GtUword *suftab_ptr;
+  GtUword s,t,suftab_s,suftab_t;
+  GtUword *suftab_copy = gt_malloc(sizeof(GtUword) * suftab_size);
   bool reverse_direct;
   bool has_output = true;
 
-  suftab_ptr = (GtUword*)(suftab);
-  for (s = 0; s < 1; s++) 
-  {
-    GtUword tmp;
-    for (t=s+1;t < suftab_size;t++)
-    {
-      tmp = suftab_ptr[t];
-      idx = t;
-      while ( idx > 0 && suftab[idx-1] > tmp )
-      {
-        suftab_ptr[idx] = suftab[idx-1];
-        idx--;
-      }
-      suftab_ptr[idx] = tmp;
-    }
-  }
+  memcpy(suftab_copy, suftab,
+        suftab_size * sizeof(GtUword));
+
+  qsort(suftab_copy, suftab_size,
+                      sizeof(GtUword), &compare_suftabvalues);
 
   for (s = 0;s < 1;s++)
   {
-    suftab_s = suftab[s];
+    suftab_s = suftab_copy[s];
     for (t=s+1;t < suftab_size;t++)
     {
       GtUword seqnum_s,seqnum_t;
-      suftab_t = suftab[t];
+      suftab_t = suftab_copy[t];
       if (suftab_s > suftab_t)
       {
         GtUword tmp;
@@ -256,9 +250,10 @@ void process_repeat_compact(void *info,
   
     if (printinfo->sequencedesc)
     {
-      print_sequence(encseq, suftab[0], maxlen);
+      print_sequence(encseq, suftab_copy[0], maxlen);
     }
   }
+  gt_free(suftab_copy);
 }
 
 static void* gt_smax_arguments_new(void)
