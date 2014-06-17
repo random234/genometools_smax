@@ -76,6 +76,7 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
 
     
 
+  }
 
   if (nerepeat_progress != NULL)
   {
