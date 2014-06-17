@@ -74,24 +74,8 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
     sumsuftab += previoussuffix; /* silly but guarantees that loop is not
                                   eliminated by compiler */
 
-    while (period < max)
-    {
-      idx++;
-      period = max;
-      max = lcpvalue;
-      if ((max > period) && (max >= searchlength))
-      { 
+    
 
-        // push to stack
-      }
-    }
-
-/*    while (top(LB).lcp <= max)
-    {
-      if (top(LB).lcp
-    }
-    */
-  }
 
   if (nerepeat_progress != NULL)
   {

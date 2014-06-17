@@ -104,7 +104,6 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
     GtError *err)
 {
   GtESASmaxLcpintervalsVisitor *lev;
-//  GtUword s,t;
   GtLcpmaxintervalinfo *ret_info = (GtLcpmaxintervalinfo *) info;
   gt_assert(ev && err);
   lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
@@ -114,10 +113,6 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
     if (gt_esa_smax_verify_supmax(lev->encseq,&(lev->suftab[lb]),(rb+1)-lb,
           lev->marktab))
     {
-//      for (s=lb;s<rb;s++)
-//      {
-//        for (t=s+1;t<=rb;t++)
-//        {
           if (!lev->silent)
           {
             lev->process_smaxpairs(lev->process_smaxpairsdata,
@@ -126,8 +121,6 @@ static int gt_esa_smax_lcpitvs_visitor_visitlcpinterval(GtESAVisitor *ev,
                               &(lev->suftab[lb]),
                               (rb+1)-lb);
           }
-//        }
-//      }
     }
   }
   return 0;
