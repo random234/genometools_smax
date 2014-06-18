@@ -24,6 +24,7 @@
 #include "match/esa-smax.h"
 #include "match/esa-smaxlcpintervals.h"
 #include "match/esa-smax-scan.h"
+#include "match/esa-NE-repeat.h"
 
 typedef struct {
   bool bool_option_smax;
@@ -429,7 +430,15 @@ static int gt_smax_runner(int argc,
     {
       if (arguments->bool_option_non_extendible)
       {
-        
+        if (gt_run_NE_repeats(ssar,
+                              arguments->ulong_option_searchlength,
+                              arguments->bool_option_silent,
+                              process_smaxpairs,
+                              process_smaxpairsdata,
+                              err) != 0)
+        {
+          had_err = -1;
+        }                          
       } 
       
       if (arguments->bool_option_smax_map)
