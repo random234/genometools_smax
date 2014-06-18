@@ -82,24 +82,14 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
           if (gt_esa_smax_verify_supmax(encseq, suftab_arr.spaceGtUword,
                 suftab_arr.nextfreeGtUword,marktab))
           {
-//            printf("Start Interval Output");
-/*            GtUword s;
-            for (s = 0;s<suftab_arr.nextfreeGtUword;s++)
+            if (!silent)
             {
-              GtUword t;
-              for (t = s+1;t<suftab_arr.nextfreeGtUword;t++)
-              {
-*/
-                if (!silent)
-                {
-                  process_smaxpairs (process_smaxpairsdata,
-                                      encseq,
-                                      currentlcpmax,
-                                      suftab_arr.spaceGtUword,
-                                      suftab_arr.nextfreeGtUword);
-                }
-//              }
-//            }
+              process_smaxpairs (process_smaxpairsdata,
+                                encseq,
+                                currentlcpmax,
+                                suftab_arr.spaceGtUword,
+                                suftab_arr.nextfreeGtUword);
+            }
           }
         }
         in_interval = false;
