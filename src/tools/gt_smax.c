@@ -74,13 +74,13 @@ void print_repeat(void *info,
   GtUword score = maxlen * 2;
 
   if (printinfo->absolute)
-  { 
+  {
     printf(""GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " " GT_WU"\n",maxlen,
           suftab_s, printinfo->method, maxlen, suftab_t,score);
   } else
   {
     GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t),
-                                              pos_corr_s = 
+                                              pos_corr_s =
                                               gt_encseq_seqstartpos(
                                               encseq, seqnum_s);
     printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " "
@@ -132,7 +132,7 @@ void process_repeat_verbose(void *info,
           {
             /* direct repeat on reverse strand found dropping it */
             reverse_direct = true;
-          } 
+          }
             suftab_t = GT_REVERSEPOS(gt_encseq_total_length(encseq),suftab_t);
             suftab_t = (suftab_t+1)-maxlen;
             seqnum_t = seqnum_t-halftotal_seqnum;
@@ -141,15 +141,15 @@ void process_repeat_verbose(void *info,
       if (!reverse_direct)
       {
         print_repeat(info,encseq,maxlen,suftab_s,suftab_t,seqnum_s,seqnum_t);
-      } else 
+      } else
       {
         reverse_direct = false;
       }
     }
-  }  
+  }
 }
 
-int compare_suftabvalues(const void *val1, const void *val2) 
+int compare_suftabvalues(const void *val1, const void *val2)
 {
   return *(GtUword *)val1 - *(GtUword *)val2;
 }
@@ -167,10 +167,10 @@ void process_repeat_compact(void *info,
   bool has_output = true;
 
   memcpy(suftab_copy, suftab,
-        suftab_size * sizeof(GtUword));
+        suftab_size * sizeof (GtUword));
 
   qsort(suftab_copy, suftab_size,
-                      sizeof(GtUword), &compare_suftabvalues);
+                      sizeof (GtUword), &compare_suftabvalues);
 
   for (s = 0;s < 1;s++)
   {
@@ -200,7 +200,7 @@ void process_repeat_compact(void *info,
           {
             /* direct repeat on reverse strand found dropping it */
             reverse_direct = true;
-          } 
+          }
             suftab_t = GT_REVERSEPOS(gt_encseq_total_length(encseq),suftab_t);
             suftab_t = (suftab_t+1)-maxlen;
             seqnum_t = seqnum_t-halftotal_seqnum;
@@ -210,35 +210,35 @@ void process_repeat_compact(void *info,
       {
         if (printinfo->absolute)
         {
-          if (t == 1) 
+          if (t == 1)
           {
             printf("" GT_WU "", maxlen);
             printf(" " GT_WU " %c " GT_WU " %c", suftab_s, printinfo->method,
                                                    suftab_t, printinfo->method);
           } else {
-            printf(" " GT_WU " %c",suftab_t, printinfo->method); 
+            printf(" " GT_WU " %c",suftab_t, printinfo->method);
           }
-        } else 
+        } else
         {
-          if (t == 1) 
+          if (t == 1)
           {
             printf("" GT_WU "", maxlen);
             GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t),
                     pos_corr_s = gt_encseq_seqstartpos(encseq, seqnum_s);
             printf(" " GT_WU " " GT_WU " %c " GT_WU " " GT_WU " %c" , seqnum_s,
                                               suftab_s-pos_corr_s,
-                                              printinfo->method, 
+                                              printinfo->method,
                                               seqnum_t,
                                               suftab_t-pos_corr_t,
                                               printinfo->method);
-          } else 
+          } else
           {
             GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t);
             printf(" " GT_WU " " GT_WU " %c", seqnum_t, suftab_t-pos_corr_t,
                                               printinfo->method);
           }
         }
-      } else 
+      } else
       {
         reverse_direct = false;
         has_output = false;
@@ -248,7 +248,7 @@ void process_repeat_compact(void *info,
   if (has_output == true)
   {
     printf(" " GT_WU "\n", maxlen*2);
-  
+
     if (printinfo->sequencedesc)
     {
       print_sequence(encseq, suftab_copy[0], maxlen);
@@ -398,7 +398,7 @@ static int gt_smax_runner(int argc,
   }
   printf("# argv[0]=%s\n", argv[0]);
 
-  if((ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
+  if ((ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
                                           arguments->index_option_smax,0),
                                           SARR_LCPTAB |
                                           SARR_SUFTAB |
@@ -406,7 +406,7 @@ static int gt_smax_runner(int argc,
                                           /* scan suftab and lcptab */
                                           /* scan = true */
                                           /* map = false */
-                                          !arguments->bool_option_smax_map, 
+                                          !arguments->bool_option_smax_map,
                                           logger,
                                           err)))
   {
@@ -418,13 +418,12 @@ static int gt_smax_runner(int argc,
     if (printargs->compact)
     {
       process_smaxpairsdata = (void *) printargs;
-      process_smaxpairs = process_repeat_compact;    
+      process_smaxpairs = process_repeat_compact;
     } else
     {
       process_smaxpairsdata = (void *) printargs;
       process_smaxpairs = process_repeat_verbose;
     }
-
 
     if (!had_err)
     {
@@ -438,15 +437,15 @@ static int gt_smax_runner(int argc,
                               err) != 0)
         {
           had_err = -1;
-        }                          
-      } 
-      
+        }
+      }
+
       if (arguments->bool_option_smax_map)
       {
         if (gt_runsmaxlcpvalues(ssar,
                                 arguments->ulong_option_searchlength,
-                                arguments->bool_option_silent, 
-                                true, 
+                                arguments->bool_option_silent,
+                                true,
                                 process_smaxpairs,
                                 process_smaxpairsdata,
                                 err) != 0)
@@ -466,9 +465,9 @@ static int gt_smax_runner(int argc,
         {
           had_err = -1;
         }
-      }      
-    } 
-  } else 
+      }
+    }
+  } else
   {
     had_err = -1;
   }
@@ -477,7 +476,7 @@ static int gt_smax_runner(int argc,
   {
     gt_freeSequentialsuffixarrayreader(&ssar);
   }
-  gt_free(printargs); 
+  gt_free(printargs);
   gt_logger_delete(logger);
   return had_err;
 }

@@ -34,13 +34,12 @@ typedef struct
 
 GT_STACK_DECLARESTRUCT(Lcp_stackelem, 32UL);
 
-
 char LEletter(char bwt1, char bwt2)
 {
   if (ISSPECIAL(bwt1) || bwt1 != bwt2)
   {
     return '$';
-  } else 
+  } else
   {
     return bwt1;
   }
@@ -104,7 +103,7 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
 //      if (current_elem.bwt == '$') { printf("special\n\n"); }
       if (current_elem.bwt == '$' && lcpvalue > searchlength)
       {
-        if (!silent) 
+        if (!silent)
         {
           /*
           process_smaxpairs (process_smaxpairsdata,
@@ -125,14 +124,14 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
     if (GT_STACK_TOP(&lcpstack).lcp == lcpvalue)
     {
       GT_STACK_TOP(&lcpstack).bwt = LEletter(GT_STACK_TOP(&lcpstack).bwt, bwt);
-    } else 
+    } else
     {
       current_elem.lcp = lcpvalue;
       current_elem.lb = lb;
       current_elem.bwt = bwt;
       GT_STACK_PUSH(&lcpstack, current_elem);
     }
-    //SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    /* SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar); */
   }
 
   if (nerepeat_progress != NULL)

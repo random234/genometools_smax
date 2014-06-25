@@ -31,7 +31,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
     GtError *err)
 {
   int haserr = 0;
-  
+
   if (!haserr)
   {
     GtTimer *linsmaxprogress = NULL;
@@ -40,7 +40,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
               idx,
               nonspecials,
               currentlcpmax;
-              
+
     GtBittab *marktab;
     GtArrayGtUword suftab_arr;
     const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
@@ -58,7 +58,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
                                               "finding supermaximal repeats");
       gt_timer_start(linsmaxprogress);
     }
-    
+
     currentlcpmax = 0;
     for (idx = 0; idx < nonspecials; idx++)
     {

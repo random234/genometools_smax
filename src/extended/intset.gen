@@ -140,7 +140,8 @@ GT_INTSET_APPEND_S(gt_intset_is_member_)(const GT_IS_TYPE *intset, GtUword elem)
 GT_UNUSED static bool
 GT_INTSET_APPEND_S(gt_intset_is_member_fp_)(const void *set, GtUword elem)
 {
-  return GT_INTSET_APPEND_S(gt_intset_is_member_)((const GT_IS_TYPE*) set, elem);
+  return GT_INTSET_APPEND_S(gt_intset_is_member_)
+    ((const GT_IS_TYPE*) set, elem);
 }
 
 static GtUword GT_INTSET_APPEND_S(gt_intset_binarysearch_pos2seqnum)(
