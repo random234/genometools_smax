@@ -40,7 +40,6 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
               idx,
               nonspecials,
               currentlcpmax;
-//    GtUword counter = 0;
 
     GtBittab *marktab;
     GtArrayGtUword suftab_arr;
