@@ -60,7 +60,6 @@ static void gt_esa_smax_lcpitvs_visitor_delete_info(GtESAVisitorInfo *vi,
   GtESASmaxLcpintervalsVisitor *lev = gt_esa_smax_lcpitvs_visitor_cast(ev);
   gt_bittab_delete(lev->marktab);
   lev->marktab = NULL;
-//  lev->ssar = NULL;
   gt_free(vi);
 }
 
@@ -79,6 +78,7 @@ static int gt_esa_smax_lcpitvs_visitor_processleafedge(
   }
   return 0;
 }
+
 static int gt_esa_smax_lcpitvs_visitor_processbranchingedge(
     GT_UNUSED GtESAVisitor *ev,
     GT_UNUSED bool firstsucc,

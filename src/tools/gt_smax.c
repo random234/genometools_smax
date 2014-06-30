@@ -429,6 +429,7 @@ static int gt_smax_runner(int argc,
     {
       if (arguments->bool_option_non_extendible)
       {
+        arguments->bool_option_smax_linear = false;
         if (gt_run_NE_repeats(ssar,
                               arguments->ulong_option_searchlength,
                               arguments->bool_option_silent,
@@ -442,6 +443,7 @@ static int gt_smax_runner(int argc,
 
       if (arguments->bool_option_smax_map)
       {
+        arguments->bool_option_smax_linear = false;
         if (gt_runsmaxlcpvalues(ssar,
                                 arguments->ulong_option_searchlength,
                                 arguments->bool_option_silent,

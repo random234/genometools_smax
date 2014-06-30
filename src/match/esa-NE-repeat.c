@@ -34,9 +34,11 @@ typedef struct
 
 GT_STACK_DECLARESTRUCT(Lcp_stackelem, 32UL);
 
+
+/*
 char LEletter(char bwt1, char bwt2)
 {
-  if (ISSPECIAL(bwt1) || bwt1 != bwt2)
+  if (bwt1 == '$' || bwt1 != bwt2)
   {
     return '$';
   } else
@@ -44,6 +46,7 @@ char LEletter(char bwt1, char bwt2)
     return bwt1;
   }
 }
+*/
 
 int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
                       GT_UNUSED GtUword searchlength,
@@ -57,14 +60,11 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
   GtTimer *nerepeat_progress = NULL;
   GtStackLcp_stackelem lcpstack;
   Lcp_stackelem current_elem;
-  GtUword lcpvalue,
-//          previoussuffix,
+  GtUword lcpvalue = 0,
+          previoussuffix = 0,
           idx,
-          nonspecials,
-          lb;
-  char bwt,
-       bwt1,
-       bwt2;
+          nonspecials;
+//          lb;
 
   const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
@@ -78,40 +78,40 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
   gt_timer_start(nerepeat_progress);
   }
 */
-  bwt1 = gt_encseq_get_decoded_char(encseq, 0, GT_READMODE_FORWARD);
-  current_elem.lcp = 0;
+
+//  bwt1 = gt_encseq_get_encoded_char(encseq, 0, GT_READMODE_FORWARD);
+  current_elem.lcp = -1;
   current_elem.lb = 0;
-  current_elem.bwt = bwt1;
+//  current_elem.bwt = bwt1;
   GT_STACK_PUSH(&lcpstack,current_elem);
   for (idx = 0; idx < nonspecials; idx++)
   {
     SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
-//    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-    lb = idx;
-    bwt2 = gt_encseq_get_decoded_char(encseq, idx+1, GT_READMODE_FORWARD);
+    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    printf("lcp: " GT_WU "\t",lcpvalue);
+    printf("suf: " GT_WU "\t",previoussuffix);
+    printf("char: %c\n",  gt_encseq_get_decoded_char(encseq, previoussuffix,GT_READMODE_FORWARD));
+//    lb = idx;
+//    lb = idx;
+//    bwt2 = gt_encseq_get_decoded_char(encseq, idx+1,GT_READMODE_FORWARD);
 //    printf("bwt1: %c bwt2: %c\n", bwt1, bwt2);
-    bwt = LEletter(bwt1, bwt2);
-//    printf("bwt: %c\n",bwt);
-//    printf("LCP: " GT_WU "\n",lcpvalue);
-//    printf("STACKTOPLCP: " GT_WU "\n",GT_STACK_TOP(&lcpstack).lcp);
-
-    bwt1 = bwt2;
+//    bwt = LEletter(bwt1, bwt2);
+//    bwt1 = bwt2;
+/*
     while (GT_STACK_TOP(&lcpstack).lcp > lcpvalue)
     {
       current_elem = GT_STACK_POP(&lcpstack);
-//      printf("current_elem.bwt: %c \n", current_elem.bwt);
-//      if (current_elem.bwt == '$') { printf("special\n\n"); }
       if (current_elem.bwt == '$' && lcpvalue > searchlength)
       {
         if (!silent)
         {
-          /*
+          
           process_smaxpairs (process_smaxpairsdata,
                               encseq,
                               current_elem.lcp,
                               suftab_arr.spaceGtUword,
                               suftab_arr.nextfreeGtUword);
-          */
+          
           printf("" GT_WU " " GT_WU " " GT_WU "\n",
                 current_elem.lcp,current_elem.lb,idx);
         }
@@ -131,7 +131,7 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
       current_elem.bwt = bwt;
       GT_STACK_PUSH(&lcpstack, current_elem);
     }
-    /* SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar); */
+    */
   }
 
   if (nerepeat_progress != NULL)
