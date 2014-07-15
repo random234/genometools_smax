@@ -29,14 +29,52 @@
 typedef struct
 {
   GtUword lcp;
-  GtUword lb;
   GtUword suf;
-  //Definedunsignedint left_context;
-  //char left_context;
-  //bool left_extendible;
+  GtUword lb;
+  Definedunsignedint left_context;
 } Lcp_stackelem;
 
 GT_STACK_DECLARESTRUCT(Lcp_stackelem, 32UL);
+
+Definedunsignedint get_left_context(const GtEncseq *encseq,
+                                    GtUword suf)
+{
+  Definedunsignedint temp;
+  if (suf > 0)
+  {
+    temp.valueunsignedint = gt_encseq_get_encoded_char(encseq,
+                                                suf-1,
+                                                GT_READMODE_FORWARD);
+    if (ISSPECIAL(temp.valueunsignedint))
+    {
+      printf("ISSPECIAL\n");
+      temp.defined = false;
+    } else
+    {
+      printf("NOTSPECIAL\n");
+      temp.defined = true;
+    }
+  } else {
+    temp.defined = false;
+  }
+  return temp;
+}
+
+Definedunsignedint check_left_context(Definedunsignedint bwt_psuf,
+                                      Definedunsignedint bwt_nsuf)
+{
+  if (bwt_psuf.defined) 
+  {
+    if(bwt_psuf.valueunsignedint == bwt_nsuf.valueunsignedint)
+    {    
+      bwt_psuf.defined = true;
+    } else
+    { 
+      bwt_psuf.defined = false;
+    }
+  }
+  return bwt_psuf;
+}
 
 int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
                       GT_UNUSED GtUword searchlength,
@@ -51,17 +89,19 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
   GtStackLcp_stackelem lcpstack;
   Lcp_stackelem current_elem;
 //  const ESASuffixptr *suftab;
-  bool interval;
   GT_UNUSED GtUword lcp,
           plcp,
+          nsuf,
           psuf,
-          ppsuf,
-          lb,
-          plb,
           idx,
+          lb,
+          plb, 
           nonspecials,
           seqnum,
           clmax;
+  Definedunsignedint bwt_psuf,
+                     bwt_nsuf,
+                     bwt;
 
   const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
@@ -79,120 +119,96 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
 
   clmax = 0;
   seqnum = 0;
-  interval = false;
   lcp = 0;
   plcp = 0;
-  lb = 0;
-  plb = 0;
+  nsuf = 0;
   psuf = 0;
-  ppsuf = 0;
-
-  current_elem.lcp = lcp;
-  current_elem.lb = lb;
-  current_elem.suf = psuf;
-
-  GT_STACK_PUSH(&lcpstack,current_elem);
+  lb = 0;
 
   for (idx = 0; idx < nonspecials; idx++)
   {
-    SSAR_NEXTSEQUENTIALLCPTABVALUE(lcp,ssar);
-    SSAR_NEXTSEQUENTIALSUFTABVALUE(psuf,ssar);
-    lb = idx;
-    printf("\nLCP: " GT_WU "\t",lcp);
-    printf("LB: " GT_WU "\t",lb);
-    printf("SUF: " GT_WU "\n",psuf);
-
-    if (interval)
+    if (idx == 0) 
     {
-      bool left_context = false;
-      printf("in interval\n");
-      while (GT_STACK_TOP(&lcpstack).lcp > plcp)
+      SSAR_NEXTSEQUENTIALSUFTABVALUE(psuf,ssar);
+      current_elem.lcp = plcp;
+      current_elem.suf = psuf;
+      current_elem.lb = idx;
+      if (psuf > 0)
       {
-        char left_char1 = 0;
-        char left_char2 = 0;
+        bwt_psuf.defined = true;
+        bwt_psuf = get_left_context(encseq,psuf);
+        current_elem.left_context = bwt_psuf;
+      } else 
+      {
+        bwt_psuf.defined = false;
+        bwt_psuf.valueunsignedint = 0;
+        current_elem.left_context = bwt_psuf;
+      }
+      GT_STACK_PUSH(&lcpstack,current_elem);
+    } else
+    {
+      SSAR_NEXTSEQUENTIALLCPTABVALUE(lcp,ssar);
+      SSAR_NEXTSEQUENTIALSUFTABVALUE(nsuf,ssar);
+      lb = idx-1;
+
+      bwt_nsuf = get_left_context(encseq,nsuf);
+      bwt = check_left_context(bwt_psuf, bwt_nsuf);
+      bwt_psuf = bwt_nsuf;
+
+      while (GT_STACK_TOP(&lcpstack).lcp > lcp)
+      {
+        printf("while\n");
         current_elem = GT_STACK_POP(&lcpstack);
-        /*
-        printf("" GT_WU " " GT_WU " " GT_WU "\n",current_elem.lcp,
-                                                current_elem.lb,
-                                                current_elem.suf);
-        */
-        if (left_context)
+        if (current_elem.left_context.defined)
         {
+          printf("true");
         } else
         {
-          if (current_elem.suf > 0) 
-          {
-            left_char1 = gt_encseq_get_decoded_char(encseq,
-                                                    current_elem.suf-1,
-                                                    GT_READMODE_FORWARD);
-          } else
-          {
-            left_char1 = '$';
-          }
-          if (ppsuf > 0)  
-          { 
-            left_char2 = gt_encseq_get_decoded_char(encseq,
-                                                    ppsuf-1,
-                                                    GT_READMODE_FORWARD);
-          } else
-          {
-            left_char2 = '$';
-          }
-
-          if (ISSPECIAL(left_char1) || left_char1 != left_char2)
-          {
-            printf("" GT_WU " " GT_WU " " GT_WU " F ",current_elem.lcp,
-                                                    seqnum,
-                                                    current_elem.suf);
-            printf("" GT_WU " " GT_WU " " GT_WU "\n",current_elem.lcp,
-                                                    seqnum,
-                                                    ppsuf);
-            left_context = true;
-          }
-          left_char1 = 0;
-          left_char2 = 0;
-                    
+          printf("false");
         }
-        // SAVE LAST POP
+        printf("\n");
+        if (!current_elem.left_context.defined && current_elem.lcp >= searchlength)
+        {
+          printf("LCP: " GT_WU " i: " GT_WU " j: " GT_WU "\n",
+                current_elem.lcp, current_elem.lb, idx-1);
+        } 
+    
+        lb = current_elem.lb;
+        GT_STACK_TOP(&lcpstack).left_context = 
+                      check_left_context(current_elem.left_context,
+                        GT_STACK_TOP(&lcpstack).left_context);
+        bwt = check_left_context(current_elem.left_context,bwt);
       }
-      interval = false;
-      /*
-      printf("" GT_WU " ",plcp);
-      printf("" GT_WU " ",plb);
-      printf("" GT_WU "\n",ppsuf);
-      */
-      clmax = plcp;
-    }
 
-    if (clmax == lcp)
-    { 
-      printf("clmax == lcp\n");
-      current_elem.lcp = lcp;
-      current_elem.lb = lb;
-      current_elem.suf = psuf;
-      GT_STACK_PUSH(&lcpstack,current_elem);
-    }
+      if (GT_STACK_TOP(&lcpstack).lcp == lcp)
+      {
+        printf("lcp == STACK_TOP\n");
 
-    if (clmax > lcp)
-    {
-      printf("clmax > lcp\n");
-      interval = true;
+            GT_STACK_TOP(&lcpstack).left_context =
+                                    check_left_context(
+                                    GT_STACK_TOP(&lcpstack).left_context,
+                                    bwt);
+      } else 
+      {
+        printf("lcp > STACK_TOP\n");
+        current_elem.lcp = lcp;
+        current_elem.suf = psuf;
+        current_elem.lb = lb;
+        current_elem.left_context = bwt;
+        GT_STACK_PUSH(&lcpstack,current_elem);
+      }
+
+      printf("LCP: " GT_WU "\t",lcp);
+      printf("PREVIOUSLCP: " GT_WU "\t",plcp);
+      printf("LB: " GT_WU "\t",lb);
+      printf("NSUF: " GT_WU "\t",nsuf);
+      printf("PSUF: " GT_WU "\n",psuf);
+
+      // search_repeats(lcpstack, plcp, ppsuf, psuf, lb-1)
       plcp = lcp;
+      psuf = nsuf;
       plb = lb;
-      ppsuf = psuf;
-      clmax = lcp;
     }
-
-    if (clmax < lcp)
-    {
-      printf("clmax < lcp \t interval=true\n");
-      current_elem.lcp = lcp;
-      current_elem.lb = lb;
-      current_elem.suf = psuf;
-      GT_STACK_PUSH(&lcpstack,current_elem);
-      clmax = lcp;
-    }
-
 /*    
       GT_STACK_PUSH(&lcpstack,current_elem);
       SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
