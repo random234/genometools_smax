@@ -47,11 +47,9 @@ Definedunsignedint get_left_context(const GtEncseq *encseq,
                                                 GT_READMODE_FORWARD);
     if (ISSPECIAL(temp.valueunsignedint))
     {
-      printf("ISSPECIAL\n");
       temp.defined = false;
     } else
     {
-      printf("NOTSPECIAL\n");
       temp.defined = true;
     }
   } else {
@@ -77,10 +75,10 @@ Definedunsignedint check_left_context(Definedunsignedint bwt_psuf,
 }
 
 int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
-                      GT_UNUSED GtUword searchlength,
-                      GT_UNUSED bool silent,
-                      GT_UNUSED GtProcessSmaxpairs process_smaxpairs,
-                      GT_UNUSED void *process_smaxpairsdata,
+                      GtUword searchlength,
+                      bool silent,
+                      GtProcessNEintervals process_NE_repeat,
+                      GT_UNUSED void *process_NE_repeat_data,
                       GtError *err)
 {
   bool haserr = false;
@@ -88,17 +86,16 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
   GtTimer *nerepeat_progress = NULL;
   GtStackLcp_stackelem lcpstack;
   Lcp_stackelem current_elem;
-//  const ESASuffixptr *suftab;
-  GT_UNUSED GtUword lcp,
+  GtArrayGtUword suftab_arr;
+  const GtUword *suftab;
+  GtUword lcp,
           plcp,
           nsuf,
           psuf,
           idx,
           lb,
-          plb, 
-          nonspecials,
-          seqnum,
-          clmax;
+          prevrb,
+          nonspecials;
   Definedunsignedint bwt_psuf,
                      bwt_nsuf,
                      bwt;
@@ -106,24 +103,24 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
   const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
 //  suftab = gt_suffixarraySequentialsuffixarrayreader(ssar)->suftab;
+  suftab = gt_suftabSequentialsuffixarrayreader(ssar);
   GT_STACK_INIT(&lcpstack,32UL);
+  GT_INITARRAY(&suftab_arr,GtUword);
 
-/*  gt_showtime_enable();
+  gt_showtime_enable();
   if (gt_showtime_enabled())
   {
     nerepeat_progress = gt_timer_new_with_progress_description(
         "finding non-extendible repeats");
   gt_timer_start(nerepeat_progress);
   }
-*/
 
-  clmax = 0;
-  seqnum = 0;
   lcp = 0;
   plcp = 0;
   nsuf = 0;
   psuf = 0;
   lb = 0;
+  prevrb = 0;
 
   for (idx = 0; idx < nonspecials; idx++)
   {
@@ -157,20 +154,30 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
 
       while (GT_STACK_TOP(&lcpstack).lcp > lcp)
       {
-        printf("while\n");
         current_elem = GT_STACK_POP(&lcpstack);
-        if (current_elem.left_context.defined)
-        {
-          printf("true");
-        } else
-        {
-          printf("false");
-        }
-        printf("\n");
+        
         if (!current_elem.left_context.defined && current_elem.lcp >= searchlength)
         {
-          printf("LCP: " GT_WU " i: " GT_WU " j: " GT_WU "\n",
-                current_elem.lcp, current_elem.lb, idx-1);
+          if (!silent)
+          {
+            if (GT_STACK_TOP(&lcpstack).lb != current_elem.lb)
+            {
+              prevrb = 0;
+            }
+
+            process_NE_repeat(process_NE_repeat_data,
+                              encseq,
+                              suftab,
+                              current_elem.lcp,
+                              current_elem.lb,
+                              idx-1,
+                              prevrb);
+/*
+            printf("LCP: " GT_WU " i: " GT_WU " j: " GT_WU "\n",
+                  current_elem.lcp, current_elem.lb, idx-1);
+*/
+            prevrb = idx-1;
+          }
         } 
     
         lb = current_elem.lb;
@@ -182,7 +189,7 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
 
       if (GT_STACK_TOP(&lcpstack).lcp == lcp)
       {
-        printf("lcp == STACK_TOP\n");
+//        printf("lcp == STACK_TOP\n");
 
             GT_STACK_TOP(&lcpstack).left_context =
                                     check_left_context(
@@ -190,32 +197,23 @@ int gt_run_NE_repeats(Sequentialsuffixarrayreader *ssar,
                                     bwt);
       } else 
       {
-        printf("lcp > STACK_TOP\n");
+//        printf("lcp > STACK_TOP\n");
         current_elem.lcp = lcp;
         current_elem.suf = psuf;
         current_elem.lb = lb;
         current_elem.left_context = bwt;
         GT_STACK_PUSH(&lcpstack,current_elem);
       }
-
+/*
       printf("LCP: " GT_WU "\t",lcp);
       printf("PREVIOUSLCP: " GT_WU "\t",plcp);
       printf("LB: " GT_WU "\t",lb);
       printf("NSUF: " GT_WU "\t",nsuf);
       printf("PSUF: " GT_WU "\n",psuf);
-
-      // search_repeats(lcpstack, plcp, ppsuf, psuf, lb-1)
+*/
       plcp = lcp;
       psuf = nsuf;
-      plb = lb;
     }
-/*    
-      GT_STACK_PUSH(&lcpstack,current_elem);
-      SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
-      SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-      GT_STACK_TOP(&lcpstack).lcp
-      current_elem = GT_STACK_POP(&lcpstack);
-*/
   }
 
   if (nerepeat_progress != NULL)

@@ -29,6 +29,14 @@ typedef void (*GtProcessSmaxpairs)(void *,
                                   const GtUword *,
                                   const GtUword);
 
+typedef void (*GtProcessNEintervals)(void *,
+                                    const struct GtEncseq *,
+                                    const GtUword *,
+                                    GtUword,
+                                    GtUword,
+                                    GtUword,
+                                    GtUword);
+
 bool gt_esa_smax_verify_supmax(const GtEncseq *,
                               const GtUword *,
                               const GtUword,

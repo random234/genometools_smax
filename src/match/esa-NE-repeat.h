@@ -26,7 +26,7 @@
 int gt_run_NE_repeats(Sequentialsuffixarrayreader *,
                       GtUword,
                       bool,
-                      GtProcessSmaxpairs,
+                      GtProcessNEintervals,
                       void *,
                       GtError *);
 

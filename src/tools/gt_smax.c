@@ -62,6 +62,28 @@ void print_sequence(const GtEncseq *encseq, GtUword pos, GtUword len)
   printf("\n");
 }
 
+bool check_suffix_context(const GtEncseq *encseq, GtUword s, GtUword t)
+{
+  if ((s && t) > 0)
+  {
+    s = gt_encseq_get_encoded_char(encseq, s-1, GT_READMODE_FORWARD);
+    t = gt_encseq_get_encoded_char(encseq, t-1, GT_READMODE_FORWARD);
+    if (ISSPECIAL(s) || ISSPECIAL(t))
+    { 
+      return true;
+    } else {
+      if (s != t) 
+      {
+        return true;
+      }
+    }
+  } else
+  {
+    return true;
+  }
+  return false;
+}
+
 void print_repeat(void *info,
                   const GtEncseq *encseq,
                   GtUword maxlen,
@@ -80,9 +102,7 @@ void print_repeat(void *info,
   } else
   {
     GtUword pos_corr_t = gt_encseq_seqstartpos(encseq, seqnum_t),
-                                              pos_corr_s =
-                                              gt_encseq_seqstartpos(
-                                              encseq, seqnum_s);
+            pos_corr_s = gt_encseq_seqstartpos(encseq, seqnum_s);
     printf("" GT_WU " " GT_WU " " GT_WU " %3c " GT_WU " " GT_WU " "
            GT_WU " " GT_WU "\n",maxlen, seqnum_s, suftab_s-pos_corr_s,
            printinfo->method, maxlen, seqnum_t, suftab_t-pos_corr_t,score);
@@ -102,7 +122,10 @@ void process_repeat_verbose(void *info,
 {
   PrintArguments *printinfo = (PrintArguments *) info;
   GtUword s,t,suftab_s,suftab_t;
-  bool reverse_direct;
+  bool reverse_direct,
+       swapped;
+  reverse_direct = false;
+  swapped = false;
 
   for (s = 0;s < suftab_size;s++)
   {
@@ -117,6 +140,7 @@ void process_repeat_verbose(void *info,
         tmp = suftab_s;
         suftab_s = suftab_t;
         suftab_t = tmp;
+        swapped = true;
       }
       seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
       seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
@@ -145,6 +169,11 @@ void process_repeat_verbose(void *info,
       {
         reverse_direct = false;
       }
+      if (swapped)
+      {
+        suftab_s = suftab_t;
+        swapped = false;
+      }
     }
   }
 }
@@ -163,8 +192,14 @@ void process_repeat_compact(void *info,
   PrintArguments *printinfo = (PrintArguments *) info;
   GtUword s,t,suftab_s,suftab_t;
   GtUword *suftab_copy = gt_malloc(sizeof(GtUword) * suftab_size);
-  bool reverse_direct;
-  bool has_output = true;
+  bool reverse_direct,
+       has_output,
+       swapped;
+  reverse_direct = false;
+  has_output = true;
+  swapped = false;
+
+
 
   memcpy(suftab_copy, suftab,
         suftab_size * sizeof (GtUword));
@@ -185,6 +220,7 @@ void process_repeat_compact(void *info,
         tmp = suftab_s;
         suftab_s = suftab_t;
         suftab_t = tmp;
+        swapped = true;
       }
       seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
       seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
@@ -243,6 +279,11 @@ void process_repeat_compact(void *info,
         reverse_direct = false;
         has_output = false;
       }
+      if (swapped)
+      {
+        suftab_s = suftab_t;
+        swapped = false;
+      }
     }
   }
   if (has_output == true)
@@ -256,6 +297,83 @@ void process_repeat_compact(void *info,
   }
   gt_free(suftab_copy);
 }
+
+void process_NE_repeat_map(void *info,
+                  const GtEncseq *encseq,
+                  const GtUword *suftab,
+                  GtUword lcp,
+                  GtUword lb,
+                  GtUword rb,
+                  GtUword prevrb)
+{
+  PrintArguments *printinfo = (PrintArguments *) info;
+  GtUword s,
+          t,
+          suftab_s,
+          suftab_t;
+  bool reverse_direct,
+       swapped;
+  reverse_direct = false;
+  swapped = false;
+
+  for (s = lb;s < rb+1;s++)
+  {
+    suftab_s = suftab[s];
+    for (t=(s+1)+prevrb;t < rb+1;t++)
+    {
+      GtUword seqnum_s,seqnum_t;
+      suftab_t = suftab[t];
+      if (suftab_s > suftab_t)
+      {
+        GtUword tmp;
+        tmp = suftab_s;
+        suftab_s = suftab_t;
+        suftab_t = tmp;
+        swapped = true;
+      }
+      seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
+      seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
+      printinfo->method = 'D';
+
+      if (printinfo->palindromic)
+      {
+        GtUword halftotal_seqnum = GT_DIV2(gt_encseq_num_of_sequences(encseq));
+        if (seqnum_t >= halftotal_seqnum)
+        {
+          printinfo->method = 'P';
+          if (seqnum_s >= halftotal_seqnum)
+          {
+            /* direct repeat on reverse strand found dropping it */
+            reverse_direct = true;
+          }
+            suftab_t = GT_REVERSEPOS(gt_encseq_total_length(encseq),suftab_t);
+            suftab_t = (suftab_t+1)-lcp;
+            seqnum_t = seqnum_t-halftotal_seqnum;
+        }
+      }
+      if (!reverse_direct)
+      {
+        if (check_suffix_context(encseq, suftab_s, suftab_t))
+        {
+          print_repeat(info,encseq,lcp,suftab_s,suftab_t,seqnum_s,seqnum_t);
+        }
+      } else
+      {
+        reverse_direct = false;
+      }
+      if (swapped)
+      {
+        suftab_s = suftab_t;
+        swapped = false;
+      }
+    }
+    if (prevrb > 0)
+    {
+      prevrb--;
+    }
+  }
+}
+
 
 static void* gt_smax_arguments_new(void)
 {
@@ -376,6 +494,8 @@ static int gt_smax_runner(int argc,
   Sequentialsuffixarrayreader *ssar;
   GtProcessSmaxpairs process_smaxpairs;
   void *process_smaxpairsdata;
+  GtProcessNEintervals process_NEintervals;
+  void *process_NEintervalsdata;
   PrintArguments *printargs = gt_malloc(sizeof(PrintArguments));
   int had_err = 0;
   logger = gt_logger_new(arguments->bool_option_smax, GT_LOGGER_DEFLT_PREFIX,
@@ -430,14 +550,22 @@ static int gt_smax_runner(int argc,
       if (arguments->bool_option_non_extendible)
       {
         arguments->bool_option_smax_linear = false;
-        if (gt_run_NE_repeats(ssar,
+        if (arguments->bool_option_smax_map)
+        {
+          process_NEintervalsdata = (void *) printargs; 
+          process_NEintervals = process_NE_repeat_map;
+          if (gt_run_NE_repeats(ssar,
                               arguments->ulong_option_searchlength,
                               arguments->bool_option_silent,
-                              process_smaxpairs,
-                              process_smaxpairsdata,
+                              process_NEintervals,
+                              process_NEintervalsdata,
                               err) != 0)
+          {
+            had_err = -1;
+          }
+        } else
         {
-          had_err = -1;
+          printf("linear scan not available at the moment\n");
         }
       }
 
