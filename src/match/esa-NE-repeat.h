@@ -40,8 +40,17 @@ typedef void (*GtProcessNEintervals)(void *,
 Definedunsignedint get_left_context(const GtEncseq *,
                                     GtUword);
 
+<<<<<<< HEAD
 Definedunsignedint check_left_context(Definedunsignedint,
                                       Definedunsignedint);
+=======
+int gt_run_NE_repeats(Sequentialsuffixarrayreader *,
+                      GtUword,
+                      bool,
+                      GtProcessNEintervals,
+                      void *,
+                      GtError *);
+>>>>>>> mapped version of esa-NE-repeat.c
 
 bool is_notleftextendible(const GtEncseq *,
                           const GtUword *,
