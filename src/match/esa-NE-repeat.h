@@ -23,11 +23,24 @@
 #include "core/showtime.h"
 #include "match/esa-NE-repeat.h"
 
-int gt_run_NE_repeats(Sequentialsuffixarrayreader *,
+int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *,
                       GtUword,
                       bool,
                       GtProcessNEintervals,
                       void *,
                       GtError *);
+
+int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *,
+                          GtUword,
+                          bool,
+                          GtProcessNEintervals,
+                          void *,
+                          GtError *);
+
+Definedunsignedint get_left_context(const GtEncseq *,
+                                    GtUword);
+
+Definedunsignedint check_left_context(Definedunsignedint,
+                                      Definedunsignedint);
 
 #endif

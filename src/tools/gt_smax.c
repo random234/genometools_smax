@@ -554,7 +554,7 @@ static int gt_smax_runner(int argc,
         {
           process_NEintervalsdata = (void *) printargs; 
           process_NEintervals = process_NE_repeat_map;
-          if (gt_run_NE_repeats(ssar,
+          if (gt_run_NE_repeats_map(ssar,
                               arguments->ulong_option_searchlength,
                               arguments->bool_option_silent,
                               process_NEintervals,
@@ -565,7 +565,17 @@ static int gt_smax_runner(int argc,
           }
         } else
         {
-          printf("linear scan not available at the moment\n");
+          process_NEintervalsdata = (void *) printargs; 
+          process_NEintervals = process_NE_repeat_map;
+          if (gt_run_NE_repeats_map(ssar,
+                              arguments->ulong_option_searchlength,
+                              arguments->bool_option_silent,
+                              process_NEintervals,
+                              process_NEintervalsdata,
+                              err) != 0)
+          {
+            had_err = -1;
+          }
         }
       }
 
