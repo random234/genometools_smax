@@ -22,20 +22,6 @@
 #include "match/esa-smax.h"
 #include "core/defined-types.h"
 
-/* vorraussichtlice Stackgroesse muss geschaetzt werden um
- * konstante Stackgroesse sinnvoll zu waehlen.
- */
-
-typedef struct
-{
-  GtUword lcp;
-  GtUword suf;
-  GtUword lb;
-  Definedunsignedint left_context;
-} Lcp_stackelem;
-
-GT_STACK_DECLARESTRUCT(Lcp_stackelem, 32UL);
-
 Definedunsignedint get_left_context(const GtEncseq *encseq,
                                     GtUword suf)
 {
@@ -74,3 +60,35 @@ Definedunsignedint check_left_context(Definedunsignedint bwt_psuf,
   return bwt_psuf;
 }
 
+void verify_non_extendibility(const GtEncseq *encseq,
+                              const GtUword *suftab,
+                              const GtUword suftab_size)
+{
+  GtUword s,
+          suf;
+//  GtUword *suftab_copy = gt_malloc(sizeof(GtUword) * suftab_size);
+//  seqnum = 0;
+/*
+  memcpy(suftab_copy, suftab,
+         suftab_size * sizeof (GtUword));
+
+  qsort(suftab_copy, suftab_size,
+        sizeof (GtUword), &compare_suftabvalues);
+*/
+  for (s = 0; s < suftab_size; s++)
+  {
+    suf = suftab[s];
+    if (suf != 0)
+    {
+      printf(" " GT_WU "",suf);
+      printf(" %c",gt_encseq_get_decoded_char(encseq,
+                                                     suf-1,
+                                                     GT_READMODE_FORWARD));
+    } else
+    {
+      printf(" " GT_WU "",suf);
+      printf("$");
+    }
+  }
+  printf("\n");
+}

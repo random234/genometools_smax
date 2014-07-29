@@ -25,6 +25,8 @@
 #include "match/esa-smaxlcpintervals.h"
 #include "match/esa-smax-scan.h"
 #include "match/esa-NE-repeat.h"
+#include "match/esa-NE-repeat-map.h"
+#include "match/esa-NE-repeat-scan.h"
 
 typedef struct {
   bool bool_option_smax;
@@ -32,8 +34,8 @@ typedef struct {
   GtUword ulong_option_searchlength;
   bool bool_option_absolute;
   bool bool_option_silent;
-  bool bool_option_smax_linear;
-  bool bool_option_smax_map;
+  bool bool_option_linear;
+  bool bool_option_mapped;
   bool bool_option_compact;
   bool bool_option_direct;
   bool bool_option_palindromic;
@@ -297,83 +299,87 @@ void process_repeat_compact(void *info,
   }
   gt_free(suftab_copy);
 }
-
-void process_NE_repeat_map(void *info,
-                  const GtEncseq *encseq,
+/*
+void process_NE_repeat(void *info,
+                  GT_UNUSED const GtEncseq *encseq,
                   const GtUword *suftab,
                   GtUword lcp,
                   GtUword lb,
                   GtUword rb,
-                  GtUword prevrb)
+                  GT_UNUSED GtUword prevrb)
 {
   PrintArguments *printinfo = (PrintArguments *) info;
   GtUword s,
-          t,
-          suftab_s,
-          suftab_t;
-  bool reverse_direct,
-       swapped;
-  reverse_direct = false;
-  swapped = false;
+          suf,
+          seqnum;
 
-  for (s = lb;s < rb+1;s++)
+  GtUword *suftab_copy = gt_malloc(sizeof(GtUword) * (rb+1-lb));
+  seqnum = 0;
+
+  memcpy(suftab_copy, suftab,
+         (rb+1-lb) * sizeof (GtUword));
+
+  qsort(suftab_copy, (rb+1-lb),
+        sizeof (GtUword), &compare_suftabvalues);
+
+  printf("" GT_WU "",lcp);
+  for (s = 0; s < (rb+1-lb); s++)
   {
-    suftab_s = suftab[s];
-    for (t=(s+1)+prevrb;t < rb+1;t++)
+    suf = suftab_copy[s];
+    if (printinfo->absolute)
     {
-      GtUword seqnum_s,seqnum_t;
-      suftab_t = suftab[t];
-      if (suftab_s > suftab_t)
-      {
-        GtUword tmp;
-        tmp = suftab_s;
-        suftab_s = suftab_t;
-        suftab_t = tmp;
-        swapped = true;
-      }
-      seqnum_s = gt_encseq_seqnum(encseq,suftab_s);
-      seqnum_t = gt_encseq_seqnum(encseq,suftab_t);
-      printinfo->method = 'D';
-
-      if (printinfo->palindromic)
-      {
-        GtUword halftotal_seqnum = GT_DIV2(gt_encseq_num_of_sequences(encseq));
-        if (seqnum_t >= halftotal_seqnum)
-        {
-          printinfo->method = 'P';
-          if (seqnum_s >= halftotal_seqnum)
-          {
-            /* direct repeat on reverse strand found dropping it */
-            reverse_direct = true;
-          }
-            suftab_t = GT_REVERSEPOS(gt_encseq_total_length(encseq),suftab_t);
-            suftab_t = (suftab_t+1)-lcp;
-            seqnum_t = seqnum_t-halftotal_seqnum;
-        }
-      }
-      if (!reverse_direct)
-      {
-        if (check_suffix_context(encseq, suftab_s, suftab_t))
-        {
-          print_repeat(info,encseq,lcp,suftab_s,suftab_t,seqnum_s,seqnum_t);
-        }
-      } else
-      {
-        reverse_direct = false;
-      }
-      if (swapped)
-      {
-        suftab_s = suftab_t;
-        swapped = false;
-      }
-    }
-    if (prevrb > 0)
+      printf(" " GT_WU "",suf);
+    } else
     {
-      prevrb--;
+      GtUword pos_corr;
+      seqnum = gt_encseq_seqnum(encseq,suf);
+      pos_corr = gt_encseq_seqstartpos(encseq, seqnum),
+      printf(" " GT_WU " " GT_WU "",seqnum,suf-pos_corr);
     }
   }
+  
+  printf("\n");
+  gt_free(suftab_copy);
 }
+*/
+void process_NE_repeat(void *info,
+                  GT_UNUSED const GtEncseq *encseq,
+                  const GtUword *suftab,
+                  GtUword lcp,
+                  GtUword suftab_size)
+{
+  PrintArguments *printinfo = (PrintArguments *) info;
+  GtUword s,
+          suf,
+          seqnum;
+  GtUword *suftab_copy = gt_malloc(sizeof(GtUword) * suftab_size);
+  seqnum = 0;
 
+  memcpy(suftab_copy, suftab,
+         suftab_size * sizeof (GtUword));
+
+  qsort(suftab_copy, suftab_size,
+        sizeof (GtUword), &compare_suftabvalues);
+
+  printf("" GT_WU "",lcp);
+  for (s = 0; s < suftab_size; s++)
+  {
+    suf = suftab_copy[s];
+    if (printinfo->absolute)
+    {
+      printf(" " GT_WU "",suf);
+    } else
+    {
+      GtUword pos_corr;
+      seqnum = gt_encseq_seqnum(encseq,suf);
+      pos_corr = gt_encseq_seqstartpos(encseq, seqnum),
+      printf(" " GT_WU " " GT_WU "",seqnum,suf-pos_corr);
+    }
+  }
+  
+  printf("\n");
+  gt_free(suftab_copy);
+}
 
 static void* gt_smax_arguments_new(void)
 {
@@ -430,11 +436,11 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op,option);
 
   option = gt_option_new_bool("linear", "Use linear scan implementation",
-            &arguments->bool_option_smax_linear,true);
+            &arguments->bool_option_linear,true);
     gt_option_parser_add_option(op,option);
 
   option = gt_option_new_bool("map", "Use map scan implementation",
-      &arguments->bool_option_smax_map,false);
+      &arguments->bool_option_mapped,false);
   gt_option_parser_add_option(op,option);
 
   option = gt_option_new_bool("compact", "Show compact output ",
@@ -526,7 +532,7 @@ static int gt_smax_runner(int argc,
                                           /* scan suftab and lcptab */
                                           /* scan = true */
                                           /* map = false */
-                                          !arguments->bool_option_smax_map,
+                                          !arguments->bool_option_mapped,
                                           logger,
                                           err)))
   {
@@ -549,24 +555,11 @@ static int gt_smax_runner(int argc,
     {
       if (arguments->bool_option_non_extendible)
       {
-        arguments->bool_option_smax_linear = false;
-        if (arguments->bool_option_smax_map)
+        if (arguments->bool_option_mapped)
         {
+          arguments->bool_option_linear = false;
           process_NEintervalsdata = (void *) printargs; 
-          process_NEintervals = process_NE_repeat_map;
-          if (gt_run_NE_repeats_map(ssar,
-                              arguments->ulong_option_searchlength,
-                              arguments->bool_option_silent,
-                              process_NEintervals,
-                              process_NEintervalsdata,
-                              err) != 0)
-          {
-            had_err = -1;
-          }
-        } else
-        {
-          process_NEintervalsdata = (void *) printargs; 
-          process_NEintervals = process_NE_repeat_map;
+          process_NEintervals = process_NE_repeat;
           if (gt_run_NE_repeats_map(ssar,
                               arguments->ulong_option_searchlength,
                               arguments->bool_option_silent,
@@ -577,41 +570,57 @@ static int gt_smax_runner(int argc,
             had_err = -1;
           }
         }
-      }
+        if (arguments->bool_option_linear)
+        {
+          process_NEintervalsdata = (void *) printargs; 
+          process_NEintervals = process_NE_repeat;
+          if (gt_run_NE_repeats_scan(ssar,
+                              arguments->ulong_option_searchlength,
+                              arguments->bool_option_silent,
+                              process_NEintervals,
+                              process_NEintervalsdata,
+                              err) != 0)
+          {
+            had_err = -1;
+          }
+        }
+      } 
 
-      if (arguments->bool_option_smax_map)
+      if (!arguments->bool_option_non_extendible)
       {
-        arguments->bool_option_smax_linear = false;
-        if (gt_runsmaxlcpvalues(ssar,
-                                arguments->ulong_option_searchlength,
-                                arguments->bool_option_silent,
-                                true,
-                                process_smaxpairs,
-                                process_smaxpairsdata,
-                                err) != 0)
+        if (arguments->bool_option_mapped)
         {
-          had_err = -1;
+          arguments->bool_option_linear = false;
+          if (gt_runsmaxlcpvalues(ssar,
+                                  arguments->ulong_option_searchlength,
+                                  arguments->bool_option_silent,
+                                  true,
+                                  process_smaxpairs,
+                                  process_smaxpairsdata,
+                                  err) != 0)
+          {
+            had_err = -1;
+          }
         }
-        arguments->bool_option_smax_linear = false;
-      }
-      if (arguments->bool_option_smax_linear)
-      {
-        if (gt_runlinsmax(ssar,
-                          arguments->ulong_option_searchlength,
-                          arguments->bool_option_silent,
-                          process_smaxpairs,
-                          process_smaxpairsdata,
-                          err) != 0)
+        if (arguments->bool_option_linear)
         {
-          had_err = -1;
+          if (gt_runlinsmax(ssar,
+                            arguments->ulong_option_searchlength,
+                            arguments->bool_option_silent,
+                            process_smaxpairs,
+                            process_smaxpairsdata,
+                            err) != 0)
+          {
+            had_err = -1;
+          }
         }
       }
-    }
+    } 
   } else
   {
     had_err = -1;
   }
-
+  
   if (ssar != NULL)
   {
     gt_freeSequentialsuffixarrayreader(&ssar);

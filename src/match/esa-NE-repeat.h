@@ -22,20 +22,20 @@
 #include "core/encseq_api.h"
 #include "core/showtime.h"
 #include "match/esa-NE-repeat.h"
-
-int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *,
-                      GtUword,
-                      bool,
-                      GtProcessNEintervals,
-                      void *,
-                      GtError *);
-
-int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *,
-                          GtUword,
-                          bool,
-                          GtProcessNEintervals,
-                          void *,
-                          GtError *);
+/*
+typedef void (*GtProcessNEintervals)(void *,
+                                     const GtEncseq *,
+                                     const GtUword *,
+                                     GtUword,
+                                     GtUword,
+                                     GtUword,
+                                     GtUword);
+*/
+typedef void (*GtProcessNEintervals)(void *,
+                                     const GtEncseq *,
+                                     const GtUword *,
+                                     GtUword,
+                                     GtUword);
 
 Definedunsignedint get_left_context(const GtEncseq *,
                                     GtUword);
@@ -43,4 +43,7 @@ Definedunsignedint get_left_context(const GtEncseq *,
 Definedunsignedint check_left_context(Definedunsignedint,
                                       Definedunsignedint);
 
+void verify_non_extendibility(const GtEncseq *,
+                              const GtUword *,
+                              const GtUword);
 #endif
