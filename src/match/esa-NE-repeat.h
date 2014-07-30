@@ -43,7 +43,7 @@ Definedunsignedint get_left_context(const GtEncseq *,
 Definedunsignedint check_left_context(Definedunsignedint,
                                       Definedunsignedint);
 
-void verify_non_extendibility(const GtEncseq *,
-                              const GtUword *,
-                              const GtUword);
+bool is_notleftextendible(const GtEncseq *,
+                          const GtUword *,
+                          const GtUword);
 #endif

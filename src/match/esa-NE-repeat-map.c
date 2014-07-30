@@ -86,7 +86,7 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
       current_elem.lb = idx;
       if (psuf > 0)
       {
-        bwt_psuf.defined = true;
+//        bwt_psuf.defined = true;
         bwt_psuf = get_left_context(encseq,psuf);
         current_elem.left_context = bwt_psuf;
       } else 
@@ -109,23 +109,33 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
       while (GT_STACK_TOP(&lcpstack).lcp > lcp)
       {
         current_elem = GT_STACK_POP(&lcpstack);
-        
+/*        printf("current_elem.left_context: %c \n",
+            current_elem.left_context.valueunsignedint);
+        printf("stack_top.left_context: %c \n",
+                GT_STACK_TOP(&lcpstack).left_context.valueunsignedint);
+*/
         if (!current_elem.left_context.defined && current_elem.lcp >= searchlength)
         {
           if (!silent)
           {
-//            verify_non_extendibility(encseq,
-//                                     &suftab[current_elem.lb],
-//                                     idx-current_elem.lb);
+            if(is_notleftextendible(encseq,
+                                     &suftab[current_elem.lb],
+                                     idx-current_elem.lb))
+            {
+              printf("Range is NLE\n");
+            } else
+            {
+              printf("WARNING LE Range detected");
+            }
             process_NE_repeat(process_NE_repeat_data,
                               encseq,
                               &suftab[current_elem.lb],
                               current_elem.lcp,
                               idx-current_elem.lb);
-/*
+
             printf("LCP: " GT_WU " i: " GT_WU " j: " GT_WU "\n",
                   current_elem.lcp, current_elem.lb, idx-1);
-*/
+
           }
         } 
     

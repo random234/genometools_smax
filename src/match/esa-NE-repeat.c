@@ -28,6 +28,16 @@ Definedunsignedint get_left_context(const GtEncseq *encseq,
   Definedunsignedint temp;
   if (suf > 0)
   {
+/*
+    printf("suf: " GT_WU " char: %c\n",suf,
+        gt_encseq_get_decoded_char(encseq,
+                                   suf,
+                                   GT_READMODE_FORWARD));
+    printf("suf-1: " GT_WU " char: %c\n",suf-1,
+        gt_encseq_get_decoded_char(encseq,
+                                   suf-1,
+                                   GT_READMODE_FORWARD));
+*/
     temp.valueunsignedint = gt_encseq_get_encoded_char(encseq,
                                                 suf-1,
                                                 GT_READMODE_FORWARD);
@@ -60,12 +70,13 @@ Definedunsignedint check_left_context(Definedunsignedint bwt_psuf,
   return bwt_psuf;
 }
 
-void verify_non_extendibility(const GtEncseq *encseq,
+bool is_notleftextendible(const GtEncseq *encseq,
                               const GtUword *suftab,
                               const GtUword suftab_size)
 {
   GtUword s,
-          suf;
+          suf,
+          suf_comp;
 //  GtUword *suftab_copy = gt_malloc(sizeof(GtUword) * suftab_size);
 //  seqnum = 0;
 /*
@@ -75,20 +86,42 @@ void verify_non_extendibility(const GtEncseq *encseq,
   qsort(suftab_copy, suftab_size,
         sizeof (GtUword), &compare_suftabvalues);
 */
-  for (s = 0; s < suftab_size; s++)
+  suf = suftab[0];
+  if (suf != 0)
+  {
+    suf_comp = gt_encseq_get_encoded_char(encseq,suf-1,GT_READMODE_FORWARD);
+  } else
+  {
+    suf_comp = 254;
+  }
+  for (s = 1; s < suftab_size; s++)
   {
     suf = suftab[s];
     if (suf != 0)
     {
+/*
       printf(" " GT_WU "",suf);
       printf(" %c",gt_encseq_get_decoded_char(encseq,
                                                      suf-1,
                                                      GT_READMODE_FORWARD));
+*/
+      if (ISSPECIAL(suf_comp) || ISSPECIAL(gt_encseq_get_encoded_char(encseq,suf-1,GT_READMODE_FORWARD)))
+      {
+        return true;
+      }
+      if (suf_comp != gt_encseq_get_encoded_char(encseq,suf-1,GT_READMODE_FORWARD))
+      {
+        return true;
+      }
     } else
     {
+      return true;
+/*
       printf(" " GT_WU "",suf);
       printf("$");
+*/
     }
   }
-  printf("\n");
+  return false;
+//  printf("\n");
 }
