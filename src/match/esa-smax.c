@@ -30,20 +30,27 @@ bool gt_esa_smax_verify_supmax(const GtEncseq *encseq,
   GtUword idx;
   gt_bittab_unset(marktab);
 
-  for (idx=0;idx<suftabsubset_size;idx++)
+  
+  if (suftabsubset_size > gt_bittab_size(marktab))
   {
-    GtUword suf = suftabsubset[idx];
-    if (suf > 0)
+    return false;
+  } else
+  {
+    for (idx=0;idx<suftabsubset_size;idx++)
     {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,
-                                              GT_READMODE_FORWARD);
-      if (ISNOTSPECIAL(cc))
+      GtUword suf = suftabsubset[idx];
+      if (suf > 0)
       {
-        if (gt_bittab_bit_is_set(marktab,cc))
+        GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,
+                                                GT_READMODE_FORWARD);
+        if (ISNOTSPECIAL(cc))
         {
-          return false;
+          if (gt_bittab_bit_is_set(marktab,cc))
+          {
+            return false;
+          }
+          gt_bittab_set_bit(marktab,cc);
         }
-        gt_bittab_set_bit(marktab,cc);
       }
     }
   }

@@ -70,7 +70,9 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
         currentlcpmax = lcpvalue;
         suftab_arr.nextfreeGtUword = 0;
       }
-      if (lcpvalue == currentlcpmax && in_interval)
+
+      if (lcpvalue == currentlcpmax && in_interval && lcpvalue >= searchlength)
+      //if (lcpvalue == currentlcpmax && in_interval)
       {
         GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);
       }

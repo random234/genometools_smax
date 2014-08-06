@@ -26,7 +26,7 @@
 typedef struct
 {
   GtUword lcp;
-  GtUword suf;
+//  GtUword suf;
   GtUword lb;
   Definedunsignedint left_context;
 } Lcp_stackelem;
@@ -84,7 +84,7 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
     {
       SSAR_NEXTSEQUENTIALSUFTABVALUE(psuf,ssar);
       current_elem.lcp = plcp;
-      current_elem.suf = psuf;
+//      current_elem.suf = psuf;
       current_elem.lb = idx;
       if (psuf > 0)
       {
@@ -140,14 +140,14 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
 
       if (GT_STACK_TOP(&lcpstack).lcp == lcp)
       {
-            GT_STACK_TOP(&lcpstack).left_context =
-                                    check_left_context(
-                                    GT_STACK_TOP(&lcpstack).left_context,
-                                    bwt);
+         GT_STACK_TOP(&lcpstack).left_context =
+                                 check_left_context(
+                                 GT_STACK_TOP(&lcpstack).left_context,
+                                 bwt);
       } else 
       {
         current_elem.lcp = lcp;
-        current_elem.suf = psuf;
+//        current_elem.suf = psuf;
         current_elem.lb = lb;
         current_elem.left_context = bwt;
         GT_STACK_PUSH(&lcpstack,current_elem);
@@ -156,7 +156,8 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
       {
         pos_corr = idx;
 //        printf("pos_corr: " GT_WU "\n",pos_corr);
-        GT_FREEARRAY(&suftab_arr,GtUword);
+//        GT_FREEARRAY(&suftab_arr,GtUword);
+        suftab_arr.nextfreeGtUword = 0;
         GT_STOREINARRAY(&suftab_arr,GtUword,32,nsuf);
       }
 /*
@@ -170,8 +171,9 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
       psuf = nsuf;
     }
   }
-  GT_FREEARRAY(&suftab_arr,GtUword);
 
+  GT_FREEARRAY(&suftab_arr,GtUword);
+  GT_STACK_DELETE(&lcpstack);
   if (nerepeat_progress != NULL)
   {
     gt_timer_show_progress_final(nerepeat_progress, stdout);

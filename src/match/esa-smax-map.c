@@ -74,6 +74,7 @@ static int gt_esa_smax_lcpitvs_visitor_processleafedge(
 {
   if (firstsucc)
   {
+//    printf("true\n");
     ((GtLcpmaxintervalinfo *) info)->maxlcpinterval = true;
   }
   return 0;

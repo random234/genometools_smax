@@ -26,7 +26,7 @@
 typedef struct
 {
   GtUword lcp;
-  GtUword suf;
+//  GtUword suf;
   GtUword lb;
   Definedunsignedint left_context;
 } Lcp_stackelem;
@@ -82,11 +82,10 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
     {
       SSAR_NEXTSEQUENTIALSUFTABVALUE(psuf,ssar);
       current_elem.lcp = plcp;
-      current_elem.suf = psuf;
+//      current_elem.suf = psuf;
       current_elem.lb = idx;
       if (psuf > 0)
       {
-//        bwt_psuf.defined = true;
         bwt_psuf = get_left_context(encseq,psuf);
         current_elem.left_context = bwt_psuf;
       } else 
@@ -118,6 +117,7 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
         {
           if (!silent)
           {
+#ifdef SKDEBUG
             if(is_notleftextendible(encseq,
                                      &suftab[current_elem.lb],
                                      idx-current_elem.lb))
@@ -127,18 +127,16 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
             {
               printf("WARNING LE Range detected");
             }
+            printf("LCP: " GT_WU " i: " GT_WU " j: " GT_WU "\n",
+                  current_elem.lcp, current_elem.lb, idx-1);
+#endif
             process_NE_repeat(process_NE_repeat_data,
                               encseq,
                               &suftab[current_elem.lb],
                               current_elem.lcp,
                               idx-current_elem.lb);
-
-            printf("LCP: " GT_WU " i: " GT_WU " j: " GT_WU "\n",
-                  current_elem.lcp, current_elem.lb, idx-1);
-
           }
         } 
-    
         lb = current_elem.lb;
         GT_STACK_TOP(&lcpstack).left_context = 
                       check_left_context(current_elem.left_context,
@@ -148,17 +146,14 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
 
       if (GT_STACK_TOP(&lcpstack).lcp == lcp)
       {
-//        printf("lcp == STACK_TOP\n");
-
             GT_STACK_TOP(&lcpstack).left_context =
                                     check_left_context(
                                     GT_STACK_TOP(&lcpstack).left_context,
                                     bwt);
       } else 
       {
-//        printf("lcp > STACK_TOP\n");
         current_elem.lcp = lcp;
-        current_elem.suf = psuf;
+//        current_elem.suf = psuf;
         current_elem.lb = lb;
         current_elem.left_context = bwt;
         GT_STACK_PUSH(&lcpstack,current_elem);
@@ -171,10 +166,11 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
       printf("PSUF: " GT_WU "\n",psuf);
 */
       plcp = lcp;
-      psuf = nsuf;
+//      psuf = nsuf;
     }
   }
 
+  GT_STACK_DELETE(&lcpstack);
   if (nerepeat_progress != NULL)
   {
     gt_timer_show_progress_final(nerepeat_progress, stdout);
