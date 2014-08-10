@@ -64,7 +64,8 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
     {
       SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
       SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-      if (lcpvalue > currentlcpmax)
+      if (lcpvalue > currentlcpmax && lcpvalue >= searchlength)
+      //if (lcpvalue > currentlcpmax && lcpvalue)
       {
         in_interval = true;
         currentlcpmax = lcpvalue;
