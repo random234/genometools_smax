@@ -84,7 +84,6 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
     {
       SSAR_NEXTSEQUENTIALSUFTABVALUE(psuf,ssar);
       current_elem.lcp = plcp;
-//      current_elem.suf = psuf;
       current_elem.lb = idx;
       if (psuf > 0)
       {
@@ -147,7 +146,6 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
       } else 
       {
         current_elem.lcp = lcp;
-//        current_elem.suf = psuf;
         current_elem.lb = lb;
         current_elem.left_context = bwt;
         GT_STACK_PUSH(&lcpstack,current_elem);

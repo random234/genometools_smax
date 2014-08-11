@@ -40,6 +40,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
               idx,
               nonspecials,
               currentlcpmax;
+//    GtUword counter = 0;
 
     GtBittab *marktab;
     GtArrayGtUword suftab_arr;
@@ -81,7 +82,9 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
       {
         if (in_interval && currentlcpmax >= searchlength)
         {
-          GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);
+          GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);       
+//          if (gt_esa_smax_verify_supmax_count(encseq, suftab_arr.spaceGtUword,
+//                suftab_arr.nextfreeGtUword,marktab,&counter))
           if (gt_esa_smax_verify_supmax(encseq, suftab_arr.spaceGtUword,
                 suftab_arr.nextfreeGtUword,marktab))
           {
@@ -101,6 +104,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
       }
     }
 
+//  printf("COUNT:" GT_WU "\n",counter);
     if (linsmaxprogress != NULL)
     {
       gt_timer_show_progress_final(linsmaxprogress, stdout);
