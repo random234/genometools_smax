@@ -102,10 +102,11 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
     {
       SSAR_NEXTSEQUENTIALLCPTABVALUE(lcp,ssar);
       SSAR_NEXTSEQUENTIALSUFTABVALUE(nsuf,ssar);
-      GT_STOREINARRAY(&suftab_arr,GtUword,32,nsuf);
-
+      if (lcp >= searchlength) // increases memory efficiency
+      {
+        GT_STOREINARRAY(&suftab_arr,GtUword,32,nsuf);
+      }
       lb = idx-1;
-
       bwt_nsuf = get_left_context(encseq,nsuf);
       bwt = check_left_context(bwt_psuf, bwt_nsuf);
       bwt_psuf = bwt_nsuf;
@@ -113,7 +114,6 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
       while (GT_STACK_TOP(&lcpstack).lcp > lcp)
       {
         current_elem = GT_STACK_POP(&lcpstack);
-        
         if (!current_elem.left_context.defined && current_elem.lcp >= searchlength)
         {
           if (!silent)
@@ -137,18 +137,21 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
         bwt = check_left_context(current_elem.left_context,bwt);
       }
 
-      if (GT_STACK_TOP(&lcpstack).lcp == lcp)
+      if (lcp >= searchlength) // decreaes run-time
       {
-         GT_STACK_TOP(&lcpstack).left_context =
-                                 check_left_context(
-                                 GT_STACK_TOP(&lcpstack).left_context,
-                                 bwt);
-      } else 
-      {
-        current_elem.lcp = lcp;
-        current_elem.lb = lb;
-        current_elem.left_context = bwt;
-        GT_STACK_PUSH(&lcpstack,current_elem);
+        if (GT_STACK_TOP(&lcpstack).lcp == lcp)
+        {
+           GT_STACK_TOP(&lcpstack).left_context =
+                                   check_left_context(
+                                   GT_STACK_TOP(&lcpstack).left_context,
+                                   bwt);
+        } else 
+        {
+          current_elem.lcp = lcp;
+          current_elem.lb = lb;
+          current_elem.left_context = bwt;
+          GT_STACK_PUSH(&lcpstack,current_elem);
+        }
       }
       if (lcp == 0)
       {
