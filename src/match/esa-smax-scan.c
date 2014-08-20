@@ -66,7 +66,6 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
       SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
       SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
       if (lcpvalue > currentlcpmax && lcpvalue >= searchlength)
-      //if (lcpvalue > currentlcpmax && lcpvalue)
       {
         in_interval = true;
         currentlcpmax = lcpvalue;
@@ -74,17 +73,15 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
       }
 
       if (lcpvalue == currentlcpmax && in_interval && lcpvalue >= searchlength)
-      //if (lcpvalue == currentlcpmax && in_interval)
       {
         GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);
       }
+
       if (lcpvalue < currentlcpmax)
       {
         if (in_interval && currentlcpmax >= searchlength)
         {
           GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);       
-//          if (gt_esa_smax_verify_supmax_count(encseq, suftab_arr.spaceGtUword,
-//                suftab_arr.nextfreeGtUword,marktab,&counter))
           if (gt_esa_smax_verify_supmax(encseq, suftab_arr.spaceGtUword,
                 suftab_arr.nextfreeGtUword,marktab))
           {
@@ -100,11 +97,10 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
         }
         in_interval = false;
         currentlcpmax = lcpvalue;
-        suftab_arr.nextfreeGtUword = 0;
+      // suftab_arr.nextfreeGtUword = 0;
       }
     }
 
-//  printf("COUNT:" GT_WU "\n",counter);
     if (linsmaxprogress != NULL)
     {
       gt_timer_show_progress_final(linsmaxprogress, stdout);
