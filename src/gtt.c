@@ -163,8 +163,8 @@
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 #include "tools/gt_wtree.h"
-#include "tools/gt_unique_encseq.h"
-#include "tools/gt_unique_encseq_extract.h"
+//#include "tools/gt_unique_encseq.h"
+//#include "tools/gt_unique_encseq_extract.h"
 #include "tools/gt_smax.h"
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/block.h"

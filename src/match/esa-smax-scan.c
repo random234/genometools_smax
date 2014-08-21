@@ -40,11 +40,10 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
               idx,
               nonspecials,
               currentlcpmax;
-
+    bool in_interval;
     GtBittab *marktab;
     GtArrayGtUword suftab_arr;
     const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
-    bool in_interval = true;
 
     gt_error_check(err);
     marktab = gt_bittab_new(gt_alphabet_size(gt_encseq_alphabet(encseq)));
@@ -59,11 +58,14 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
       gt_timer_start(linsmaxprogress);
     }
 
+    in_interval = false;
     currentlcpmax = 0;
     for (idx = 0; idx < nonspecials; idx++)
     {
       SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
       SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+//      printf("SUF: " GT_WU " LCP: " GT_WU " curlcpmax: " GT_WU "\n",previoussuffix, lcpvalue,currentlcpmax);
+//      printf("LCP: " GT_WU "\n",lcpvalue);
       if (lcpvalue > currentlcpmax && lcpvalue >= searchlength)
       {
         in_interval = true;
@@ -71,16 +73,15 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
         suftab_arr.nextfreeGtUword = 0;
       }
 
-      if (lcpvalue == currentlcpmax && in_interval && lcpvalue >= searchlength)
+      if (in_interval)
       {
         GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);
       }
 
       if (lcpvalue < currentlcpmax)
       {
-        if (in_interval && currentlcpmax >= searchlength)
+        if (in_interval)
         {
-          GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);       
           if (gt_esa_smax_verify_supmax(encseq, suftab_arr.spaceGtUword,
                 suftab_arr.nextfreeGtUword,marktab))
           {
