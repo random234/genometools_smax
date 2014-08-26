@@ -40,7 +40,7 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
               idx,
               nonspecials,
               currentlcpmax;
-    bool in_interval;
+    bool in_interval, prune;
     GtBittab *marktab;
     GtArrayGtUword suftab_arr;
     const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
@@ -57,33 +57,36 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
                                               "finding supermaximal repeats");
       gt_timer_start(linsmaxprogress);
     }
-
+    prune = true;
     in_interval = false;
     currentlcpmax = 0;
     for (idx = 0; idx < nonspecials; idx++)
     {
       SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
       SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-//      printf("SUF: " GT_WU " LCP: " GT_WU " curlcpmax: " GT_WU "\n",previoussuffix, lcpvalue,currentlcpmax);
-//      printf("LCP: " GT_WU "\n",lcpvalue);
-      if (lcpvalue > currentlcpmax && lcpvalue >= searchlength)
-      {
-        in_interval = true;
-        currentlcpmax = lcpvalue;
-        suftab_arr.nextfreeGtUword = 0;
-      }
 
-      if (in_interval)
+      if (lcpvalue >= searchlength || !prune)
       {
-        GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);
-      }
+        prune = false;
 
-      if (lcpvalue < currentlcpmax)
-      {
+        if (lcpvalue > currentlcpmax)
+        {
+          in_interval = true;
+          currentlcpmax = lcpvalue;
+          suftab_arr.nextfreeGtUword = 0;
+        }
+
         if (in_interval)
         {
-          if (gt_esa_smax_verify_supmax(encseq, suftab_arr.spaceGtUword,
-                suftab_arr.nextfreeGtUword,marktab))
+          GT_STOREINARRAY(&suftab_arr,GtUword,32,previoussuffix);
+        }
+
+        if (lcpvalue < currentlcpmax)
+        {
+          if (in_interval && gt_esa_smax_verify_supmax(encseq,
+                                      suftab_arr.spaceGtUword,
+                                      suftab_arr.nextfreeGtUword,
+                                      marktab))
           {
             if (!silent)
             {
@@ -93,14 +96,15 @@ int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
                                 suftab_arr.spaceGtUword,
                                 suftab_arr.nextfreeGtUword);
             }
-          }
+          }          
+          in_interval = false;
+          currentlcpmax = lcpvalue;
+          prune = true;
         }
-        in_interval = false;
-        currentlcpmax = lcpvalue;
-      // suftab_arr.nextfreeGtUword = 0;
+      } else {
+        currentlcpmax=lcpvalue;
       }
     }
-
     if (linsmaxprogress != NULL)
     {
       gt_timer_show_progress_final(linsmaxprogress, stdout);

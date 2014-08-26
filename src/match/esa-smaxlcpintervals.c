@@ -19,6 +19,7 @@
 #include "match/esa-seqread.h"
 #include "match/esa-bottomup.h"
 #include "core/str_api.h"
+#include "core/arraydef.h"
 #include "match/esa-dfs.h"
 #include "core/showtime.h"
 #include "match/esa-smax.h"
