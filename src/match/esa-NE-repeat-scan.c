@@ -33,6 +33,61 @@ typedef struct
 
 GT_STACK_DECLARESTRUCT(Lcp_stackelem, 32UL);
 
+/*
+int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
+                          GT_UNUSED GtUword searchlength,
+                          GT_UNUSED bool silent,
+                          GT_UNUSED GtProcessNEintervals process_NE_repeat,
+                          GT_UNUSED void *process_NE_repeat_data,
+                          GtError *err)
+{
+  GT_UNUSED bool haserr = false;
+  gt_error_check(err);
+  GtTimer *nerepeat_progress = NULL;
+  GtStackLcp_stackelem lcpstack;
+//  Lcp_stackelem current_elem;
+  GtArrayGtUword suftab_arr;
+  GtUword lcp,
+          previoussuffix,
+          idx,
+          nonspecials,
+          currentlcpmax;
+  bool in_interval = true;
+//  Definedunsignedint bwt_psuf,
+//                     bwt_nsuf,
+//                     bwt;
+  GT_UNUSED const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
+  nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
+  GT_STACK_INIT(&lcpstack,32UL);
+  GT_INITARRAY(&suftab_arr,GtUword);
+  gt_showtime_enable();
+  if (gt_showtime_enabled())
+  {
+    nerepeat_progress = gt_timer_new_with_progress_description(
+        "finding non-extendible repeats");
+    gt_timer_start(nerepeat_progress);
+  }
+
+
+  for (idx = 0; idx < nonspecials; idx++)
+  {
+    SSAR_NEXTSEQUENTIALLCPTABVALUE(lcp,ssar);
+    SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    printf("SUF: " GT_WU "\t LCP: " GT_WU "\n",previoussuffix,lcp);
+
+    if(lcpvalue > currentlcpmax)
+    {
+      in_interval = true;
+      currentlcpmax = lcpvalue;
+    }
+
+
+
+  }
+  return haserr ? -1 : 0;
+}
+*/
+
 int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
                       GtUword searchlength,
                       bool silent,
@@ -105,7 +160,12 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
       if (lcp >= searchlength) // increases memory efficiency
       {
         GT_STOREINARRAY(&suftab_arr,GtUword,32,nsuf);
+      } else 
+      {
+        pos_corr++;
       }
+
+
       lb = idx-1;
       bwt_nsuf = get_left_context(encseq,nsuf);
       bwt = check_left_context(bwt_psuf, bwt_nsuf);
@@ -123,10 +183,6 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
                               &suftab_arr.spaceGtUword[current_elem.lb-pos_corr],
                               current_elem.lcp,
                               ((idx)-pos_corr-1)-(current_elem.lb-pos_corr-1));
-/*            
-            printf("LCP: " GT_WU " i: " GT_WU " j: " GT_WU "\n",
-                  current_elem.lcp, current_elem.lb, idx-1);
-*/
           }
         } 
     
@@ -156,18 +212,9 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
       if (lcp == 0)
       {
         pos_corr = idx;
-//        printf("pos_corr: " GT_WU "\n",pos_corr);
-//        GT_FREEARRAY(&suftab_arr,GtUword);
         suftab_arr.nextfreeGtUword = 0;
         GT_STOREINARRAY(&suftab_arr,GtUword,32,nsuf);
       }
-/*
-      printf("LCP: " GT_WU "\t",lcp);
-      printf("PREVIOUSLCP: " GT_WU "\t",plcp);
-      printf("LB: " GT_WU "\t",lb);
-      printf("NSUF: " GT_WU "\t",nsuf);
-      printf("PSUF: " GT_WU "\n",psuf);
-*/
       plcp = lcp;
       psuf = nsuf;
     }
@@ -181,10 +228,6 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
     gt_timer_delete(nerepeat_progress);
   }
 
-/*  if (ssar != NULL)
-  {
-    gt_freeSequentialsuffixarrayreader(&ssar);
-  }
-*/
   return haserr ? -1 : 0;
 }
+
