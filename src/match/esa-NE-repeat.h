@@ -37,10 +37,10 @@ typedef void (*GtProcessNEintervals)(void *,
                                      GtUword,
                                      GtUword);
 
-Definedunsignedint get_left_context(const GtEncseq *,
+Definedunsignedint get_lctx(const GtEncseq *,
                                     GtUword);
 
-Definedunsignedint check_left_context(Definedunsignedint,
+Definedunsignedint check_lctx(Definedunsignedint,
                                       Definedunsignedint);
 
 bool is_notleftextendible(const GtEncseq *,

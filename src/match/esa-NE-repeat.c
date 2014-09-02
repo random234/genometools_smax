@@ -22,7 +22,7 @@
 #include "match/esa-smax.h"
 #include "core/defined-types.h"
 
-Definedunsignedint get_left_context(const GtEncseq *encseq,
+Definedunsignedint get_lctx(const GtEncseq *encseq,
                                     GtUword suf)
 {
   Definedunsignedint temp;
@@ -54,20 +54,20 @@ Definedunsignedint get_left_context(const GtEncseq *encseq,
   return temp;
 }
 
-Definedunsignedint check_left_context(Definedunsignedint bwt_psuf,
-                                      Definedunsignedint bwt_nsuf)
+Definedunsignedint check_lctx(Definedunsignedint lctx_psuf,
+                                      Definedunsignedint lctx_nsuf)
 {
-  if (bwt_psuf.defined) 
+  if (lctx_psuf.defined) 
   {
-    if(bwt_psuf.valueunsignedint == bwt_nsuf.valueunsignedint)
+    if(lctx_psuf.valueunsignedint == lctx_nsuf.valueunsignedint)
     {    
-      bwt_psuf.defined = true;
+      lctx_psuf.defined = true;
     } else
     { 
-      bwt_psuf.defined = false;
+      lctx_psuf.defined = false;
     }
   }
-  return bwt_psuf;
+  return lctx_psuf;
 }
 
 bool is_notleftextendible(const GtEncseq *encseq,

@@ -28,7 +28,7 @@ typedef struct
   GtUword lcp;
 //  GtUword suf;
   GtUword lb;
-  Definedunsignedint left_context;
+  Definedunsignedint lctx;
 } Lcp_stackelem;
 
 GT_STACK_DECLARESTRUCT(Lcp_stackelem, 32UL);
@@ -44,18 +44,18 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
   gt_error_check(err);
   GtTimer *nerepeat_progress = NULL;
   GtStackLcp_stackelem lcpstack;
-  Lcp_stackelem current_elem;
+  Lcp_stackelem currelem;
   const GtUword *suftab;
   GtUword lcp,
-          plcp,
+//          plcp,
           nsuf,
           psuf,
           idx,
           lb,
           nonspecials;
-  Definedunsignedint bwt_psuf,
-                     bwt_nsuf,
-                     bwt;
+  Definedunsignedint lctx_psuf,
+                     lctx_nsuf,
+                     lctx;
 
   const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
@@ -71,9 +71,9 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
   }
 
   lcp = 0;
-  plcp = 0;
-  nsuf = 0;
-  psuf = 0;
+//  plcp = 0;
+//  nsuf = 0;
+//  psuf = 0;
   lb = 0;
 
   for (idx = 0; idx < nonspecials; idx++)
@@ -81,46 +81,46 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
     if (idx == 0) 
     {
       SSAR_NEXTSEQUENTIALSUFTABVALUE(psuf,ssar);
-      current_elem.lcp = plcp;
-//      current_elem.suf = psuf;
-      current_elem.lb = idx;
+      currelem.lcp = 0;
+//      currelem.suf = psuf;
+      currelem.lb = idx;
       if (psuf > 0)
       {
-        bwt_psuf = get_left_context(encseq,psuf);
-        current_elem.left_context = bwt_psuf;
+        lctx_psuf = get_lctx(encseq,psuf);
+        currelem.lctx = lctx_psuf;
       } else 
       {
-        bwt_psuf.defined = false;
-        bwt_psuf.valueunsignedint = 0;
-        current_elem.left_context = bwt_psuf;
+        lctx_psuf.defined = false;
+        lctx_psuf.valueunsignedint = 0;
+        currelem.lctx = lctx_psuf;
       }
-      GT_STACK_PUSH(&lcpstack,current_elem);
+      GT_STACK_PUSH(&lcpstack,currelem);
     } else
     {
       SSAR_NEXTSEQUENTIALLCPTABVALUE(lcp,ssar);
       SSAR_NEXTSEQUENTIALSUFTABVALUE(nsuf,ssar);
       lb = idx-1;
 
-      bwt_nsuf = get_left_context(encseq,nsuf);
-      bwt = check_left_context(bwt_psuf, bwt_nsuf);
-      bwt_psuf = bwt_nsuf;
+      lctx_nsuf = get_lctx(encseq,nsuf);
+      lctx = check_lctx(lctx_psuf, lctx_nsuf);
+      lctx_psuf = lctx_nsuf;
 
       while (GT_STACK_TOP(&lcpstack).lcp > lcp)
       {
-        current_elem = GT_STACK_POP(&lcpstack);
-/*        printf("current_elem.left_context: %c \n",
-            current_elem.left_context.valueunsignedint);
-        printf("stack_top.left_context: %c \n",
-                GT_STACK_TOP(&lcpstack).left_context.valueunsignedint);
+        currelem = GT_STACK_POP(&lcpstack);
+/*        printf("currelem.lctx: %c \n",
+            currelem.lctx.valueunsignedint);
+        printf("stack_top.lctx: %c \n",
+                GT_STACK_TOP(&lcpstack).lctx.valueunsignedint);
 */
-        if (!current_elem.left_context.defined && current_elem.lcp >= searchlength)
+        if (!currelem.lctx.defined && currelem.lcp >= searchlength)
         {
           if (!silent)
           {
 #ifdef SKDEBUG
             if(is_notleftextendible(encseq,
-                                     &suftab[current_elem.lb],
-                                     idx-current_elem.lb))
+                                     &suftab[currelem.lb],
+                                     idx-currelem.lb))
             {
               printf("Range is NLE\n");
             } else
@@ -128,35 +128,35 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
               printf("WARNING LE Range detected");
             }
             printf("LCP: " GT_WU " i: " GT_WU " j: " GT_WU "\n",
-                  current_elem.lcp, current_elem.lb, idx-1);
+                  currelem.lcp, currelem.lb, idx-1);
 #endif
             process_NE_repeat(process_NE_repeat_data,
                               encseq,
-                              &suftab[current_elem.lb],
-                              current_elem.lcp,
-                              idx-current_elem.lb);
+                              &suftab[currelem.lb],
+                              currelem.lcp,
+                              idx-currelem.lb);
           }
         } 
-        lb = current_elem.lb;
-        GT_STACK_TOP(&lcpstack).left_context = 
-                      check_left_context(current_elem.left_context,
-                        GT_STACK_TOP(&lcpstack).left_context);
-        bwt = check_left_context(current_elem.left_context,bwt);
+        lb = currelem.lb;
+        GT_STACK_TOP(&lcpstack).lctx = 
+                      check_lctx(currelem.lctx,
+                        GT_STACK_TOP(&lcpstack).lctx);
+        lctx = check_lctx(currelem.lctx,lctx);
       }
 
       if (GT_STACK_TOP(&lcpstack).lcp == lcp)
       {
-            GT_STACK_TOP(&lcpstack).left_context =
-                                    check_left_context(
-                                    GT_STACK_TOP(&lcpstack).left_context,
-                                    bwt);
+            GT_STACK_TOP(&lcpstack).lctx =
+                                    check_lctx(
+                                    GT_STACK_TOP(&lcpstack).lctx,
+                                    lctx);
       } else 
       {
-        current_elem.lcp = lcp;
-//        current_elem.suf = psuf;
-        current_elem.lb = lb;
-        current_elem.left_context = bwt;
-        GT_STACK_PUSH(&lcpstack,current_elem);
+        currelem.lcp = lcp;
+//        currelem.suf = psuf;
+        currelem.lb = lb;
+        currelem.lctx = lctx;
+        GT_STACK_PUSH(&lcpstack,currelem);
       }
 /*
       printf("LCP: " GT_WU "\t",lcp);
@@ -165,7 +165,7 @@ int gt_run_NE_repeats_map(Sequentialsuffixarrayreader *ssar,
       printf("NSUF: " GT_WU "\t",nsuf);
       printf("PSUF: " GT_WU "\n",psuf);
 */
-      plcp = lcp;
+//      plcp = lcp;
 //      psuf = nsuf;
     }
   }

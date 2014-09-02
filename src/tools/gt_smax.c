@@ -27,6 +27,7 @@
 #include "match/esa-NE-repeat.h"
 #include "match/esa-NE-repeat-map.h"
 #include "match/esa-NE-repeat-scan.h"
+#include "match/esa-NE-repeat-bioscan.h"
 
 typedef struct {
   bool bool_option_smax;
@@ -41,6 +42,7 @@ typedef struct {
   bool bool_option_palindromic;
   bool bool_option_sequencedesc;
   bool bool_option_non_extendible;
+  bool bool_option_non_extendible_bioscan;
 } SmaxArguments;
 
 typedef struct {
@@ -299,49 +301,7 @@ void process_repeat_compact(void *info,
   }
   gt_free(suftab_copy);
 }
-/*
-void process_NE_repeat(void *info,
-                  GT_UNUSED const GtEncseq *encseq,
-                  const GtUword *suftab,
-                  GtUword lcp,
-                  GtUword lb,
-                  GtUword rb,
-                  GT_UNUSED GtUword prevrb)
-{
-  PrintArguments *printinfo = (PrintArguments *) info;
-  GtUword s,
-          suf,
-          seqnum;
 
-  GtUword *suftab_copy = gt_malloc(sizeof(GtUword) * (rb+1-lb));
-  seqnum = 0;
-
-  memcpy(suftab_copy, suftab,
-         (rb+1-lb) * sizeof (GtUword));
-
-  qsort(suftab_copy, (rb+1-lb),
-        sizeof (GtUword), &compare_suftabvalues);
-
-  printf("" GT_WU "",lcp);
-  for (s = 0; s < (rb+1-lb); s++)
-  {
-    suf = suftab_copy[s];
-    if (printinfo->absolute)
-    {
-      printf(" " GT_WU "",suf);
-    } else
-    {
-      GtUword pos_corr;
-      seqnum = gt_encseq_seqnum(encseq,suf);
-      pos_corr = gt_encseq_seqstartpos(encseq, seqnum),
-      printf(" " GT_WU " " GT_WU "",seqnum,suf-pos_corr);
-    }
-  }
-  
-  printf("\n");
-  gt_free(suftab_copy);
-}
-*/
 void process_NE_repeat(void *info,
                   GT_UNUSED const GtEncseq *encseq,
                   const GtUword *suftab,
@@ -462,6 +422,10 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("ne", "Non-extendible repeats ",
       &arguments->bool_option_non_extendible,false);
   gt_option_parser_add_option(op,option);
+  
+  option = gt_option_new_bool("nebio", "Non-extendible repeats bioscan algo. ",
+      &arguments->bool_option_non_extendible_bioscan,false);
+  gt_option_parser_add_option(op,option);
 
   return op;
 }
@@ -484,6 +448,20 @@ static int gt_smax_arguments_check(GT_UNUSED int rest_argc,
   {
     printf("argument to option \"-l\" must be an integer >= 1\n");
     had_err = -1;
+  }
+  if (arguments->bool_option_non_extendible_bioscan)
+  {
+    if (arguments->bool_option_non_extendible)
+    {
+      printf("argument \"-ne\" is not compatible with argument \"-nebio\"\n");
+      had_err = -1;
+    }
+    if (arguments->bool_option_mapped)
+    {
+      printf("argument \"-map\" is not compatible with argument \"-nebio\"\n");
+      had_err = -1;
+    }
+    arguments->bool_option_non_extendible = true;
   }
 
   return had_err;
@@ -572,16 +550,30 @@ static int gt_smax_runner(int argc,
         }
         if (arguments->bool_option_linear)
         {
-          process_NEintervalsdata = (void *) printargs; 
+          process_NEintervalsdata = (void *) printargs;
           process_NEintervals = process_NE_repeat;
-          if (gt_run_NE_repeats_scan(ssar,
-                              arguments->ulong_option_searchlength,
-                              arguments->bool_option_silent,
-                              process_NEintervals,
-                              process_NEintervalsdata,
-                              err) != 0)
+          if (arguments->bool_option_non_extendible_bioscan)
           {
-            had_err = -1;
+            if (gt_run_NE_repeats_bioscan(ssar,
+                                arguments->ulong_option_searchlength,
+                                arguments->bool_option_silent,
+                                process_NEintervals,
+                                process_NEintervalsdata,
+                                err) != 0)
+            {
+              had_err = -1;
+            }
+          } else 
+          {
+            if (gt_run_NE_repeats_scan(ssar,
+                                arguments->ulong_option_searchlength,
+                                arguments->bool_option_silent,
+                                process_NEintervals,
+                                process_NEintervalsdata,
+                                err) != 0)
+            {
+              had_err = -1;
+            }
           }
         }
       } 
