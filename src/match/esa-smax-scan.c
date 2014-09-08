@@ -25,7 +25,7 @@
 
 int gt_runlinsmax(Sequentialsuffixarrayreader *ssar,
     GtUword searchlength,
-    bool silent,
+    const bool silent,
     GtProcessSmaxpairs process_smaxpairs,
     void *process_smaxpairsdata,
     GtError *err)

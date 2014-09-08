@@ -50,38 +50,39 @@ bool gt_esa_smax_verify_supmax(const GtEncseq *encseq,
   return true;
 }
 
-bool gt_esa_smax_verify_supmax_count(const GtEncseq *encseq,
+bool gt_esa_smax_verify_mum(const GtEncseq *encseq,
                               const GtUword *suftabsubset,
                               const GtUword suftabsubset_size,
                               GtBittab *marktab,
-                              GtUword *counter)
+                              GtBittab *mumtab)
 {
   GtUword idx;
   gt_bittab_unset(marktab);
+  gt_bittab_unset(mumtab);
 
-  
-  if (suftabsubset_size > gt_bittab_size(marktab))
+  for (idx=0;idx<suftabsubset_size;idx++)
   {
-    (*counter)++;
-    return false;
-  } else
-  {
-    for (idx=0;idx<suftabsubset_size;idx++)
+    GtUword suf = suftabsubset[idx];
+    GtUword seqnum = gt_encseq_seqnum(encseq,suf);
+    if (suf > 0)
     {
-      GtUword suf = suftabsubset[idx];
-      if (suf > 0)
+      GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,
+                                              GT_READMODE_FORWARD);
+      if (ISNOTSPECIAL(cc))
       {
-        GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,
-                                                GT_READMODE_FORWARD);
-        if (ISNOTSPECIAL(cc))
+        if (gt_bittab_bit_is_set(marktab,cc))
         {
-          if (gt_bittab_bit_is_set(marktab,cc))
-          {
-            return false;
-          }
-          gt_bittab_set_bit(marktab,cc);
+          return false;
         }
+        gt_bittab_set_bit(marktab,cc);
       }
+    }
+    if (gt_bittab_bit_is_set(mumtab,seqnum))
+    {
+      return false;
+    } else
+    {
+      gt_bittab_set_bit(mumtab,seqnum);
     }
   }
   return true;

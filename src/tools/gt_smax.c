@@ -24,6 +24,7 @@
 #include "match/esa-smax.h"
 #include "match/esa-smaxlcpintervals.h"
 #include "match/esa-smax-scan.h"
+#include "match/esa-smax-mum.h"
 #include "match/esa-NE-repeat.h"
 #include "match/esa-NE-repeat-map.h"
 #include "match/esa-NE-repeat-scan.h"
@@ -43,6 +44,7 @@ typedef struct {
   bool bool_option_sequencedesc;
   bool bool_option_non_extendible;
   bool bool_option_non_extendible_bioscan;
+  bool bool_option_mum;
 } SmaxArguments;
 
 typedef struct {
@@ -419,6 +421,10 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
             &arguments->bool_option_sequencedesc,false);
   gt_option_parser_add_option(op,option);
 
+  option = gt_option_new_bool("mum", "Maximal unique matches ",
+            &arguments->bool_option_mum,false);
+  gt_option_parser_add_option(op,option);
+
   option = gt_option_new_bool("ne", "Non-extendible repeats ",
       &arguments->bool_option_non_extendible,false);
   gt_option_parser_add_option(op,option);
@@ -596,14 +602,28 @@ static int gt_smax_runner(int argc,
         }
         if (arguments->bool_option_linear)
         {
-          if (gt_runlinsmax(ssar,
-                            arguments->ulong_option_searchlength,
-                            arguments->bool_option_silent,
-                            process_smaxpairs,
-                            process_smaxpairsdata,
-                            err) != 0)
+          if (arguments->bool_option_mum)
           {
-            had_err = -1;
+            if (gt_runlinsmaxmum(ssar,
+                              arguments->ulong_option_searchlength,
+                              arguments->bool_option_silent,
+                              process_smaxpairs,
+                              process_smaxpairsdata,
+                              err) != 0)
+            {
+              had_err = -1;
+            }
+          } else 
+          {
+            if (gt_runlinsmax(ssar,
+                              arguments->ulong_option_searchlength,
+                              arguments->bool_option_silent,
+                              process_smaxpairs,
+                              process_smaxpairsdata,
+                              err) != 0)
+            {
+              had_err = -1;
+            }
           }
         }
       }
