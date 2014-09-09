@@ -21,9 +21,9 @@
 #include "core/arraydef.h"
 #include "match/esa-seqread.h"
 #include "match/esa-smax.h"
-#include "match/esa-smax-mum.h"
+#include "match/esa-smax-scan.h"
 
-int gt_runlinsmaxmum(Sequentialsuffixarrayreader *ssar,
+int gt_runlinsmaxbwt(Sequentialsuffixarrayreader *ssar,
     GtUword searchlength,
     const bool silent,
     GtProcessSmaxpairs process_smaxpairs,
@@ -40,20 +40,17 @@ int gt_runlinsmaxmum(Sequentialsuffixarrayreader *ssar,
               previoussuffix,
               idx,
               nonspecials,
-              currentlcpmax,
-              numseq;
+              currentlcpmax;
     bool in_interval, prune;
     GtUchar bwt;
+
     GtBittab *marktab;
-    GtBittab *mumtab;
     GtArrayGtUword suftab_arr;
     GtArrayGtUchar bwttab_arr;
     const GtEncseq *encseq = gt_encseqSequentialsuffixarrayreader(ssar);
 
     gt_error_check(err);
     marktab = gt_bittab_new(gt_alphabet_size(gt_encseq_alphabet(encseq)));
-    numseq = gt_encseq_num_of_sequences(encseq);
-    mumtab = gt_bittab_new(numseq);
     nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
     suffixarray = gt_suffixarraySequentialsuffixarrayreader(ssar);
     GT_INITARRAY(&suftab_arr,GtUword);
@@ -74,7 +71,10 @@ int gt_runlinsmaxmum(Sequentialsuffixarrayreader *ssar,
     {
       SSAR_NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
       SSAR_NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+
       gt_readnextfromstream_GtUchar(&bwt,(GtBufferedfile_GtUchar*)&suffixarray->bwttabstream);
+//      printf("BWT: %d \n", bwt);
+//      printf("BWT: %d \n", suffixarray->bwttab[3]);
 
       if (lcpvalue >= searchlength || !prune)
       {
@@ -96,14 +96,10 @@ int gt_runlinsmaxmum(Sequentialsuffixarrayreader *ssar,
 
         if (lcpvalue < currentlcpmax)
         {
-          if (in_interval && suftab_arr.nextfreeGtUword <= numseq &&
-                          gt_esa_smax_verify_mum(encseq,
-                                      suftab_arr.spaceGtUword,
-                                      suftab_arr.nextfreeGtUword,
+          if (in_interval && gt_esa_smax_verify_supmax_bwt(encseq,
                                       bwttab_arr.spaceGtUchar,
                                       bwttab_arr.nextfreeGtUchar,
-                                      marktab,
-                                      mumtab))
+                                      marktab))
           {
             if (!silent)
             {
@@ -130,7 +126,6 @@ int gt_runlinsmaxmum(Sequentialsuffixarrayreader *ssar,
     GT_FREEARRAY(&suftab_arr,GtUword);
     GT_FREEARRAY(&bwttab_arr,GtUchar);
     gt_bittab_delete(marktab);
-    gt_bittab_delete(mumtab);
   }
 /*  if (ssar != NULL)
   {

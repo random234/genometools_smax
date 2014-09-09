@@ -59,7 +59,7 @@ Definedunsignedint check_lctx(Definedunsignedint lctx_psuf,
 {
   if (lctx_psuf.defined) 
   {
-    if(lctx_psuf.valueunsignedint == lctx_nsuf.valueunsignedint)
+    if (lctx_psuf.valueunsignedint == lctx_nsuf.valueunsignedint)
     {    
       lctx_psuf.defined = true;
     } else

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "unistd.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "tools/gt_smax.h"
@@ -24,6 +25,7 @@
 #include "match/esa-smax.h"
 #include "match/esa-smaxlcpintervals.h"
 #include "match/esa-smax-scan.h"
+#include "match/esa-smax-scanbwt.h"
 #include "match/esa-smax-mum.h"
 #include "match/esa-NE-repeat.h"
 #include "match/esa-NE-repeat-map.h"
@@ -36,8 +38,8 @@ typedef struct {
   GtUword ulong_option_searchlength;
   bool bool_option_absolute;
   bool bool_option_silent;
-  bool bool_option_linear;
   bool bool_option_mapped;
+  bool bool_option_linear;
   bool bool_option_compact;
   bool bool_option_direct;
   bool bool_option_palindromic;
@@ -45,6 +47,8 @@ typedef struct {
   bool bool_option_non_extendible;
   bool bool_option_non_extendible_bioscan;
   bool bool_option_mum;
+  bool bool_option_bwt;
+  bool bool_option_hat;
 } SmaxArguments;
 
 typedef struct {
@@ -432,7 +436,14 @@ static GtOptionParser* gt_smax_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("nebio", "Non-extendible repeats bioscan algo. ",
       &arguments->bool_option_non_extendible_bioscan,false);
   gt_option_parser_add_option(op,option);
+  
+  option = gt_option_new_bool("bwt", "Use bwt table",
+      &arguments->bool_option_bwt,false);
+  gt_option_parser_add_option(op,option);
 
+  option = gt_option_new_bool("hat", "Use hat algorithm ",
+      &arguments->bool_option_bwt,false);
+  gt_option_parser_add_option(op,option);
   return op;
 }
 
@@ -470,6 +481,23 @@ static int gt_smax_arguments_check(GT_UNUSED int rest_argc,
     arguments->bool_option_non_extendible = true;
   }
 
+  if (arguments->bool_option_mum &! arguments->bool_option_bwt)
+  {
+    printf("option -mum requires option -bwt\n");
+    had_err = -1;
+  }
+
+  if (arguments->bool_option_bwt)
+  {
+    GtStr *bwtfile = gt_str_new_cstr(gt_str_array_get(arguments->index_option_smax,0));
+    gt_str_append_cstr(bwtfile,".bwt");
+    if (!(access(gt_str_get(bwtfile), F_OK ) != -1)) 
+    {
+      printf("option -bwt requires table bwttab please run gt suffixerator with option -bwt\n");
+      had_err = -1;
+    } 
+    gt_str_delete(bwtfile);
+  }
   return had_err;
 }
 
@@ -508,17 +536,36 @@ static int gt_smax_runner(int argc,
   }
   printf("# argv[0]=%s\n", argv[0]);
 
-  if ((ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
-                                          arguments->index_option_smax,0),
-                                          SARR_LCPTAB |
-                                          SARR_SUFTAB |
-                                          SARR_ESQTAB,
-                                          /* scan suftab and lcptab */
-                                          /* scan = true */
-                                          /* map = false */
-                                          !arguments->bool_option_mapped,
-                                          logger,
-                                          err)))
+  if (arguments->bool_option_bwt)
+  {
+    ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
+                                      arguments->index_option_smax,0),
+                                      SARR_LCPTAB |
+                                      SARR_SUFTAB |
+                                      SARR_ESQTAB |
+                                      SARR_BWTTAB,
+                                      /* scan suftab and lcptab */
+                                      /* scan = true */
+                                      /* map = false */
+                                      !arguments->bool_option_mapped,
+                                      logger,
+                                      err);
+  } else
+  {
+    ssar = gt_newSequentialsuffixarrayreaderfromfile(gt_str_array_get(
+                                      arguments->index_option_smax,0),
+                                      SARR_LCPTAB |
+                                      SARR_SUFTAB |
+                                      SARR_ESQTAB,
+                                      /* scan suftab and lcptab */
+                                      /* scan = true */
+                                      /* map = false */
+                                      !arguments->bool_option_mapped,
+                                      logger,
+                                      err);
+  }
+
+  if (ssar != NULL) 
   {
     if (!gt_encseq_is_mirrored(gt_encseqSequentialsuffixarrayreader(ssar))
                 && arguments->bool_option_palindromic)
@@ -602,27 +649,62 @@ static int gt_smax_runner(int argc,
         }
         if (arguments->bool_option_linear)
         {
-          if (arguments->bool_option_mum)
+          if (arguments->bool_option_bwt)
           {
-            if (gt_runlinsmaxmum(ssar,
-                              arguments->ulong_option_searchlength,
-                              arguments->bool_option_silent,
-                              process_smaxpairs,
-                              process_smaxpairsdata,
-                              err) != 0)
+            if (arguments->bool_option_mum)
             {
-              had_err = -1;
+              
+              if (gt_runlinsmaxmum(ssar,
+                    arguments->ulong_option_searchlength,
+                    arguments->bool_option_silent,
+                    process_smaxpairs,
+                    process_smaxpairsdata,
+                    err) != 0)
+              {
+                had_err = -1;
+              }
+              arguments->bool_option_linear = false;
+            } 
+            if (arguments->bool_option_hat)
+            {
+              /*
+              if (gt_runlinsmaxhat(ssar,
+                    arguments->ulong_option_searchlength,
+                    arguments->bool_option_silent,
+                    process_smaxpairs,
+                    process_smaxpairsdata,
+                    err) != 0)
+              {
+                had_err = -1;
+              }
+              arguments->bool_option_linear = false;
+              */
             }
-          } else 
-          {
-            if (gt_runlinsmax(ssar,
-                              arguments->ulong_option_searchlength,
-                              arguments->bool_option_silent,
-                              process_smaxpairs,
-                              process_smaxpairsdata,
-                              err) != 0)
+            if (arguments->bool_option_linear)
             {
-              had_err = -1;
+              if (gt_runlinsmaxbwt(ssar,
+                    arguments->ulong_option_searchlength,
+                    arguments->bool_option_silent,
+                    process_smaxpairs,
+                    process_smaxpairsdata,
+                    err) != 0)
+              {
+                had_err = -1;
+              }
+            }
+          } else
+          {
+            if (arguments->bool_option_linear)
+            {
+              if (gt_runlinsmax(ssar,
+                    arguments->ulong_option_searchlength,
+                    arguments->bool_option_silent,
+                    process_smaxpairs,
+                    process_smaxpairsdata,
+                    err) != 0)
+              {
+                had_err = -1;
+              }
             }
           }
         }

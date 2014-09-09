@@ -50,9 +50,33 @@ bool gt_esa_smax_verify_supmax(const GtEncseq *encseq,
   return true;
 }
 
+bool gt_esa_smax_verify_supmax_bwt(GT_UNUSED const GtEncseq *encseq,
+                              const GtUchar *bwttab,
+                              const GtUchar bwttabsize,
+                              GtBittab *marktab)
+{
+  GtUword idx;
+  gt_bittab_unset(marktab);
+
+  for (idx=0;idx<bwttabsize;idx++)
+  {
+      GtUchar cc = bwttab[idx];
+      if (ISNOTSPECIAL(cc))
+      {
+        if (gt_bittab_bit_is_set(marktab,cc))
+        {
+          return false;
+        }
+        gt_bittab_set_bit(marktab,cc);
+      }
+  }
+  return true;
+}
 bool gt_esa_smax_verify_mum(const GtEncseq *encseq,
                               const GtUword *suftabsubset,
                               const GtUword suftabsubset_size,
+                              const GtUchar *bwttab,
+                              GT_UNUSED const GtUchar bwttabsize,
                               GtBittab *marktab,
                               GtBittab *mumtab)
 {
@@ -64,18 +88,14 @@ bool gt_esa_smax_verify_mum(const GtEncseq *encseq,
   {
     GtUword suf = suftabsubset[idx];
     GtUword seqnum = gt_encseq_seqnum(encseq,suf);
-    if (suf > 0)
+    GtUchar cc = bwttab[idx];
+    if (ISNOTSPECIAL(cc))
     {
-      GtUchar cc = gt_encseq_get_encoded_char(encseq,suf-1,
-                                              GT_READMODE_FORWARD);
-      if (ISNOTSPECIAL(cc))
+      if (gt_bittab_bit_is_set(marktab,cc))
       {
-        if (gt_bittab_bit_is_set(marktab,cc))
-        {
-          return false;
-        }
-        gt_bittab_set_bit(marktab,cc);
+        return false;
       }
+      gt_bittab_set_bit(marktab,cc);
     }
     if (gt_bittab_bit_is_set(mumtab,seqnum))
     {

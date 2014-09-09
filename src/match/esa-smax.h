@@ -34,9 +34,16 @@ bool gt_esa_smax_verify_supmax(const GtEncseq *,
                               const GtUword,
                               GtBittab *);
 
+bool gt_esa_smax_verify_supmax_bwt(const GtEncseq *,
+                              const GtUchar *,
+                              const GtUchar,
+                              GtBittab *);
+
 bool gt_esa_smax_verify_mum(const GtEncseq *,
                               const GtUword *,
                               const GtUword,
+                              const GtUchar *,
+                              const GtUchar,
                               GtBittab *,
                               GtBittab *);
 #endif

@@ -162,7 +162,20 @@ int gt_run_NE_repeats_scan(Sequentialsuffixarrayreader *ssar,
       lb = idx-1;
       lctx_nsuf = get_lctx(encseq,nsuf);
       lctx = check_lctx(lctx_psuf, lctx_nsuf);
+/*
+      printf("context: %d \n",lctx_psuf.valueunsignedint);
+      printf("context: %d \n",lctx_nsuf.valueunsignedint);
+*/
       lctx_psuf = lctx_nsuf;
+//      printf("context: %d \n",lctx.valueunsignedint);
+
+      if (lctx.defined)
+      {
+        printf("TRUE\n");
+      } else
+      {
+        printf("FALSE\n");
+      }
 
       while (GT_STACK_TOP(&lcpstack).lcp > lcp)
       {

@@ -49,3 +49,22 @@ Test do
   run_test "grep -v '^#' #{last_stdout}"
   run_test "diff #{last_stdout} #{$testdata}at1MB_smax_relative_l50.out"
 end
+Name "gt smax scanbwt diff absolute"
+Keywords "gt_smax"
+ Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -bwt -suf -sds no" +
+    " -lcp -des no -md5 no"
+  run_test "#{$bin}gt smax -ii at1MB -absolute -l 50 -bwt"
+  run_test "grep -v '^#' #{last_stdout}"
+  run_test "diff #{last_stdout} #{$testdata}at1MB_smax_absolute_l50.out"
+end
+
+Name "gt smax scanbwt diff relative"
+Keywords "gt_smax"
+Test do 
+  run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB -dna -bwt -suf -sds no" +
+    " -lcp -des no -md5 no"
+  run_test "#{$bin}gt smax -ii at1MB -l 50 -bwt"
+  run_test "grep -v '^#' #{last_stdout}"
+  run_test "diff #{last_stdout} #{$testdata}at1MB_smax_relative_l50.out"
+end
