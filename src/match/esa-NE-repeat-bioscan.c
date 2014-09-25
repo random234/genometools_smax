@@ -121,10 +121,10 @@ int gt_run_NE_repeats_bioscan(Sequentialsuffixarrayreader *ssar,
   {
     SSAR_NEXTSEQUENTIALLCPTABVALUE(lcp,ssar);
     SSAR_NEXTSEQUENTIALSUFTABVALUE(psuf,ssar);
-    printf("SUF: " GT_WU " LCP: " GT_WU "\n",psuf,lcp);
+//    printf("SUF: " GT_WU " LCP: " GT_WU "\n",psuf,lcp);
 
-    if (lcp >= searchlength)
-    {
+//    if (lcp >= searchlength)
+//    {
       if (lcp == plcp)
       {
         GT_STOREINARRAY(&suftab_arr,GtUword,32,psuf);
@@ -137,9 +137,10 @@ int gt_run_NE_repeats_bioscan(Sequentialsuffixarrayreader *ssar,
         GT_STACK_PUSH(&lcpstack,currelem);
         GT_STOREINARRAY(&suftab_arr,GtUword,32,psuf);
       } 
-    } 
+//    } 
 
-    if (lcp < plcp && plcp >= searchlength)
+//    if (lcp < plcp && plcp >= searchlength)
+    if (lcp < plcp)
     {
       GT_STOREINARRAY(&suftab_arr,GtUword,32,psuf);
       while (!(GT_STACK_TOP(&lcpstack).lcp <= lcp))
@@ -152,13 +153,16 @@ int gt_run_NE_repeats_bioscan(Sequentialsuffixarrayreader *ssar,
           { 
             if (!silent)
             {
-              process_NE_repeat(process_NE_repeat_data,
-                              encseq,
-                              &suftab_arr.spaceGtUword[currelem.lb-
-                              (poscorr_flush+poscorr_mem)],
-                              currelem.lcp,
-                              ((idx+1)-(poscorr_flush+poscorr_mem))-
-                              (currelem.lb-(poscorr_flush+poscorr_mem)));
+              if (currelem.lcp >= searchlength)
+              {
+                process_NE_repeat(process_NE_repeat_data,
+                                encseq,
+                                &suftab_arr.spaceGtUword[currelem.lb-
+                                (poscorr_flush+poscorr_mem)],
+                                currelem.lcp,
+                                ((idx+1)-(poscorr_flush+poscorr_mem))-
+                                (currelem.lb-(poscorr_flush+poscorr_mem)));
+              }
             }
           } else
           {
@@ -170,6 +174,8 @@ int gt_run_NE_repeats_bioscan(Sequentialsuffixarrayreader *ssar,
               prevNE = lb;
               if (!silent)
               {
+                if (currelem.lcp >= searchlength)
+                {
                   process_NE_repeat(process_NE_repeat_data,
                                   encseq,
                                   &suftab_arr.spaceGtUword[currelem.lb-
@@ -177,12 +183,14 @@ int gt_run_NE_repeats_bioscan(Sequentialsuffixarrayreader *ssar,
                                   currelem.lcp,
                                   ((idx+1)-(poscorr_flush+poscorr_mem))-
                                   (currelem.lb-(poscorr_flush+poscorr_mem)));
+                }
               }
             }  
           }
         }
       } 
-      if (GT_STACK_TOP(&lcpstack).lcp < lcp && lcp >= searchlength)
+//      if (GT_STACK_TOP(&lcpstack).lcp < lcp && lcp >= searchlength)
+      if (GT_STACK_TOP(&lcpstack).lcp < lcp)
       {
         currelem.lb = lb;
         currelem.lcp = lcp;
